@@ -19,8 +19,8 @@ CACHE RULES EVERYTHING AROUND ME
 #include <readline/readline.h>
 #include <readline/history.h>
 
-
-
+//putting function deceleration ups here for now until i make header file
+int clear();
 int main ()
         {
 
@@ -29,24 +29,30 @@ int main ()
 
       while (running == 0 ){
 
-        // create a string buf to hold user input
+      //create a string buf to hold user input
       char* buf;
       // get user input and wait for user to hit enter
       buf = readline("\nCREAM$HELL$$$ ");
-      printf("%s",buf);
+
 
       // if user wants to exit type exit
-      if(strcmp(buf, "exit") == 0){  running =1 ; break; }
-
-        // if fork returns 0 then this is child
+      if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\n goodbye \n"); break; }
+      else // if user entered clr then clear screen. this will be moved the handleInternal() function
+      if(strcmp(buf, "clr") == 0){  clear(); }
+      else
+        // if fork returns 0 then this is child, this will be in the exec arg function later
         if (fork() == 0)
         {
                     //create an array to hold the arguments to pass to exec
                     // for now we are just taking whatever the user says
                     char *argv[] = { buf, 0 };   //first item is whatever user enters
 
-                    // if what the user entered makes sense
-                    if (execvp(argv[0], argv) < 0);
+                    // if what the user entered doesnt makes sense
+                    if (execvp(argv[0], argv) < 0)
+                        {
+                         printf("command not recognized \n");
+                        return 0;
+                        }
                     execv("/bin", argv);         // child process attempts become what user enters in
 
              printf("I am the Child! %i\n", getpid());
@@ -61,11 +67,17 @@ int main ()
              printf("I am the Parent! %i\n",getpid());
         } // end else if parent
 
-      } // en while
+      } // end while
 
 
 
         }  // END MAIN
+
+        // function to clear screen
+        int clear(){
+        printf("\033[H\033[J") ;
+        return 0;
+        }
 
 
 
