@@ -18,9 +18,9 @@ CACHE RULES EVERYTHING AROUND ME
 #include<sys/wait.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include "CreamShell.h"
 
-//putting function deceleration ups here for now until i make header file
-int clear();
+
 int main ()
         {
 
@@ -28,7 +28,6 @@ int main ()
       int running = 0;
 
       while (running == 0 ){
-
       //create a string buf to hold user input
       char* buf;
       // get user input and wait for user to hit enter
@@ -51,10 +50,10 @@ int main ()
                     if (execvp(argv[0], argv) < 0)
                         {
                          printf("command not recognized \n");
-                        return 0;
-                        }
-                    execv("/bin", argv);         // child process attempts become what user enters in
-
+                         return 0;
+                        }                        //we look in the/bin directory where system programs should be
+                        execv("/bin", argv);         // child process becomes what user enters in
+             //this should never print
              printf("I am the Child! %i\n", getpid());
         } // end if child
 
