@@ -12,13 +12,15 @@ for temple university's 3207 OS class
 */
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h>
 #include<sys/wait.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
-
+using namespace std;
 //**********************************************************************************************************
 //***************function declarations**********************************************************************
 //**********************************************************************************************************
@@ -28,11 +30,11 @@ int clear();
 //dir()
 // env()
 // cd()
-// echo()
+int echo(char* args);
 // getUserInput ()
 // welcomeMsg ()
 // HandleInternal()
 // HandleExternal()
-//parseArgs();
+string *parseArgs(char* buf) ;
 //HandleRedrirect
 //HandlePipe()
