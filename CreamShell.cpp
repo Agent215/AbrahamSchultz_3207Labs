@@ -2,12 +2,8 @@
 CreamShell.cpp
 Abraham Schultz
 
-this is me testing how fork() and exec(() system calls can be
-implemented. In this case the program will try and create a child and automatically exec to
-whatever the user has input. at first we will trust, however naively that the user knows exactly what programs
-can be run.
 
-to be the
+
 ./creamShell
 CACHE RULES EVERYTHING AROUND ME
 */
@@ -15,6 +11,8 @@ CACHE RULES EVERYTHING AROUND ME
 #include <string.h>
 #include <string>
 #include <stdlib.h>
+#include <fstream>
+#include <iostream>
 #include <unistd.h>
 #include <cstdlib>
 #include<sys/wait.h>
@@ -54,6 +52,8 @@ int main ()
       if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\ngoodbye \n"); break; }
       else // if user entered clr then clear screen. this will be moved the handleInternal() function
       if(strcmp(buf, "clr") == 0){  clear();}
+      else
+      if(strcmp(buf, "cd") == 0){  cd(argv);}
       else
       if(strcmp(buf, "dir") == 0){ dir(); }
       else
@@ -167,5 +167,10 @@ int main ()
         return 0;
        }// end dir
 
-
-
+//*****************************************************************************************************************************************
+// function to change directory
+int cd( char *argv[])
+{
+//cout << "change to this directory " << argv[1] << endl;
+ chdir(argv[1]);
+}

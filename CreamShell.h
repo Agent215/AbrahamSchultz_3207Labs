@@ -29,12 +29,14 @@ int clear();
 // pause()
 int dir();
 // env()
-// cd()
+int cd( char *argv[]);
 int echo(char* args);
 // getUserInput ()
 // welcomeMsg ()
 // HandleInternal()
 // HandleExternal()
 string *parseArgs(char* buf) ;
-//HandleRedrirect
-//HandlePipe()
+//execArg()
+//handle &
+//parseRedrirect
+//parsePipe()
