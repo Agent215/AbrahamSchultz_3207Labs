@@ -32,6 +32,9 @@ using namespace std;
 int main ()
         {
 
+
+     // use escape sequence to change terminal color to green
+      printf("\033[0;32m");
       //flag for running
       int running = 0;
 
@@ -87,7 +90,8 @@ int main ()
 
       } // end while
 
-
+      // change color back to normal on console using escape sequences
+      printf("\x1b[0m");
         }  // END MAIN
 
 //*****************************************************************************************************************************************
@@ -116,6 +120,7 @@ int main ()
 //*****************************************************************************************************************************************
         // function to clear screen
         int clear(){
+        //use escape sequence to clear console
         printf("\033[H\033[J") ;
         return 0;
         }// end clear
@@ -135,7 +140,7 @@ int main ()
 // this prints out the files in the current working directory.
        int dir()
        {
-       struct dirent *de;  // Pointer for directory entry
+       struct dirent *ent;  // Pointer for directory entry
 
         // opendir() returns a pointer of DIR type.
         DIR *newDir = opendir(".");
@@ -148,14 +153,14 @@ int main ()
 
         int i =0;
         // use readdir to look at current files in directory any print them out
-        while ((de = readdir(newDir)) != NULL)
+        while ((ent = readdir(newDir)) != NULL)
             {
 
-            if ( !strcmp(de->d_name, ".") || !strcmp(de->d_name, "..") )
+            if ( !strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..") )
                 {
                      // dont print the current directoy and parent directory
                 } else {
-                    printf("%s   ", de->d_name);
+                    printf("%s   ", ent->d_name);
                     i++;
                 } // end if else
 
