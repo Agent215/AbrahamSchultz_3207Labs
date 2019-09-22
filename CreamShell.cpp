@@ -1,5 +1,5 @@
 /*
-testFork.c
+CreamShell.cpp
 Abraham Schultz
 
 this is me testing how fork() and exec(() system calls can be
@@ -20,6 +20,8 @@ CACHE RULES EVERYTHING AROUND ME
 #include<sys/wait.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "CreamShell.h"
 
 using namespace std;
@@ -47,10 +49,13 @@ int main ()
       // parse args
       parseArgs(buf);
 
+      //these will all be under internal command switch
       // if user wants to exit type exit
       if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\ngoodbye \n"); break; }
       else // if user entered clr then clear screen. this will be moved the handleInternal() function
       if(strcmp(buf, "clr") == 0){  clear();}
+      else
+      if(strcmp(buf, "dir") == 0){ dir(); }
       else
         // if fork returns 0 then this is child, this will be in the exec arg function later
         if (fork() == 0)
@@ -121,10 +126,46 @@ int main ()
         {
 
          printf("%s",args);
+
          return 0;
         }// end echo
 
+//*****************************************************************************************************************************************
+//function that is equivlent to linux ls command
+// this prints out the files in the current working directory.
+       int dir()
+       {
+       struct dirent *de;  // Pointer for directory entry
 
+        // opendir() returns a pointer of DIR type.
+        DIR *newDir = opendir(".");
+
+        if (newDir == NULL)  // opendir returns NULL if couldn't open directory
+        {
+        printf("Could not open current directory" );
+        return 0;
+        } // end if
+
+        int i =0;
+        // use readdir to look at current files in directory any print them out
+        while ((de = readdir(newDir)) != NULL)
+            {
+
+            if ( !strcmp(de->d_name, ".") || !strcmp(de->d_name, "..") )
+                {
+                     // dont print the current directoy and parent directory
+                } else {
+                    printf("%s   ", de->d_name);
+                    i++;
+                } // end if else
+
+
+            }// end while
+
+        printf("\n");
+        closedir(newDir);
+        return 0;
+       }// end dir
 
 
 

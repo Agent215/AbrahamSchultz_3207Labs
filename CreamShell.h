@@ -27,7 +27,7 @@ using namespace std;
 int clear();
 // help()
 // pause()
-//dir()
+int dir();
 // env()
 // cd()
 int echo(char* args);
