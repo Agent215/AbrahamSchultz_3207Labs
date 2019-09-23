@@ -27,9 +27,12 @@ CACHE RULES EVERYTHING AROUND ME
 using namespace std;
 
 
-    //declare array to use to pass to exec
+      //declare array to use to pass to exec
       char *argv[1000];
+      // errno for use with std error
       extern int errno;
+      // path string to set the path for exec
+      char *PATH[1000];
 
 int main ()
         {
@@ -75,6 +78,7 @@ int main ()
                     // if what the user entered doesnt makes sense
                     if (execvp(argv[0], argv) < 0)
                         {
+                         //change font to red and print std error
                          printf("\u001b[31m");
                          cout << strerror(errno) << endl;
                          return 0;
@@ -158,6 +162,7 @@ int main ()
 
         if (newDir == NULL)  // opendir returns NULL if couldn't open directory
         {
+                        //change font to red and print std error
                          printf("\u001b[31m");
                          cout << strerror(errno) << endl;
 
@@ -196,12 +201,12 @@ int cd( char *argv[])
 
     } else
     {
-        // something went wrong
+         //change font to red and print std error
         printf("\u001b[31m");
         cout << strerror(errno) << endl;
     }
  return 0;
-}
+}// end cd
 
 
 
@@ -216,14 +221,17 @@ int printDir(){
             printf("%s >>$CREAM$HELL$>>  ", cwd);
         }   else
         {
+            //change font to red and print std error
             printf("\u001b[31m");
             cout << strerror(errno) << endl;
             return 1;
         }// end else
 } // end printDir
 
+
+//*****************************************************************************************************************************************
 int resetColor(){
        //put color back to white for user input
       printf("\x1b[0m");
       return 0;
-}
+}// end resetColor
