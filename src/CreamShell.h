@@ -36,7 +36,9 @@ int echo(char* args);
 // HandleInternal()
 // HandleExternal()
 string *parseArgs(char* buf) ;
+int printDir();
 //execArg()
 //handle &
 //parseRedrirect
 //parsePipe()
+int resetColor();

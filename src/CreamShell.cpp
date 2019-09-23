@@ -20,6 +20,7 @@ CACHE RULES EVERYTHING AROUND ME
 #include <readline/history.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <limits.h>
 #include "CreamShell.h"
 
 using namespace std;
@@ -32,24 +33,30 @@ using namespace std;
 int main ()
         {
 
+      // clear terminal on start
+      clear();
 
-     // use escape sequence to change terminal color to green
-      printf("\033[0;32m");
       //flag for running
       int running = 0;
 
       while (running == 0 ){
-
+      // use escape sequence to change terminal color to green for prompt
+      printf("\u001b[32m");
       //create a string buf to hold user input
       char* buf;
+      printDir();
+
+      //user input is white
+      resetColor();
       // get user input and wait for user to hit enter
-      buf = readline("CREAM$HELL$$$ ");
+      buf = readline("");
+
+
 
       // check if echo
       if(strcmp(buf, "echo") == 0){ echo(buf); }
       // parse args
       parseArgs(buf);
-
       //these will all be under internal command switch
       // if user wants to exit type exit
       if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\ngoodbye \n"); break; }
@@ -67,7 +74,7 @@ int main ()
                     // if what the user entered doesnt makes sense
                     if (execvp(argv[0], argv) < 0)
                         {
-                         printf("command not recognized \n");
+                         printf("\u001b[31m command not recognized \n");
                          return 0;
                         }                            //we look in the/bin directory where system programs should be
                         execv("/bin", argv);         // child process becomes what user enters in
@@ -141,13 +148,14 @@ int main ()
        int dir()
        {
        struct dirent *ent;  // Pointer for directory entry
-
+        //set color of file txt :))
+        printf("\u001b[34m");
         // opendir() returns a pointer of DIR type.
         DIR *newDir = opendir(".");
 
         if (newDir == NULL)  // opendir returns NULL if couldn't open directory
         {
-        printf("Could not open current directory" );
+        printf("\u001b[31m Could not open current directory " );
         return 0;
         } // end if
 
@@ -169,6 +177,7 @@ int main ()
 
         printf("\n");
         closedir(newDir);
+        printf("\u001b[32m");// put color back to green
         return 0;
        }// end dir
 
@@ -178,4 +187,25 @@ int cd( char *argv[])
 {
 //cout << "change to this directory " << argv[1] << endl;
  chdir(argv[1]);
+}
+
+
+
+
+
+//*****************************************************************************************************************************************
+int printDir(){
+
+ char cwd[PATH_MAX];
+   if (getcwd(cwd, sizeof(cwd)) != NULL) {
+       printf("%s >>$CREAM$HELL$>> ", cwd);
+   } else {
+       perror(" \u001b[31m  getcwd() error");
+       return 1;
+   }
+} // end printDir
+
+int resetColor(){
+       //put color back to white for user input
+      printf("\x1b[0m");
 }
