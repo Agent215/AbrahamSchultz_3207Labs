@@ -35,7 +35,7 @@ int echo(char* args);
 // welcomeMsg ()
 // HandleInternal()
 // HandleExternal()
-string *parseArgs(char* buf) ;
+int parseArgs(char* buf) ;
 int printDir();
 //execArg()
 //handle &

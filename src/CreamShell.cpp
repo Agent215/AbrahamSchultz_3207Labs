@@ -21,6 +21,7 @@ CACHE RULES EVERYTHING AROUND ME
 #include <sys/types.h>
 #include <dirent.h>
 #include <limits.h>
+#include <errno.h>
 #include "CreamShell.h"
 
 using namespace std;
@@ -28,7 +29,7 @@ using namespace std;
 
     //declare array to use to pass to exec
       char *argv[1000];
-
+      extern int errno;
 
 int main ()
         {
@@ -74,7 +75,8 @@ int main ()
                     // if what the user entered doesnt makes sense
                     if (execvp(argv[0], argv) < 0)
                         {
-                         printf("\u001b[31m command not recognized \n");
+                         printf("\u001b[31m");
+                         cout << strerror(errno) << endl;
                          return 0;
                         }                            //we look in the/bin directory where system programs should be
                         execv("/bin", argv);         // child process becomes what user enters in
@@ -99,20 +101,21 @@ int main ()
 
       // change color back to normal on console using escape sequences
       printf("\x1b[0m");
+      return 0;
         }  // END MAIN
 
 //*****************************************************************************************************************************************
 //*****************************************************************************************************************************************
         // this will be the function to tokenize input from the user into discreet arguments
 
-        string* parseArgs(char* buf)
+        int parseArgs(char* buf)
         {
-          int i = 0;
-          string* returnStr;
-          char * cmd;
-          cmd = strtok (buf," ");
+           int i = 0;
+
+           char * cmd;
+           cmd = strtok (buf," ");
           // break off individual strings using the space as a delimiter until end of line
-          while (cmd != NULL)
+           while (cmd != NULL)
             {
             argv[i] = cmd;
            // printf ("%s\n",   cmd);
@@ -121,7 +124,7 @@ int main ()
             }
             // set lat array element to null to make exec work correctly
             argv[i] = NULL;
-            return returnStr;
+            return 0;
 
         }// end parseArgs
 //*****************************************************************************************************************************************
@@ -148,15 +151,16 @@ int main ()
        int dir()
        {
        struct dirent *ent;  // Pointer for directory entry
-        //set color of file txt :))
+        //set color of file txt :)
         printf("\u001b[34m");
         // opendir() returns a pointer of DIR type.
         DIR *newDir = opendir(".");
 
         if (newDir == NULL)  // opendir returns NULL if couldn't open directory
         {
-        printf("\u001b[31m Could not open current directory " );
-        return 0;
+                         printf("\u001b[31m");
+                         cout << strerror(errno) << endl;
+
         } // end if
 
         int i =0;
@@ -175,10 +179,10 @@ int main ()
 
             }// end while
 
-        printf("\n");
+        printf("\n\u001b[32m");// put color back to green
         closedir(newDir);
-        printf("\u001b[32m");// put color back to green
         return 0;
+
        }// end dir
 
 //*****************************************************************************************************************************************
@@ -186,7 +190,17 @@ int main ()
 int cd( char *argv[])
 {
 //cout << "change to this directory " << argv[1] << endl;
- chdir(argv[1]);
+ if (chdir(argv[1]) == 0 )
+    {
+    // we found target directory
+
+    } else
+    {
+        // something went wrong
+        printf("\u001b[31m");
+        cout << strerror(errno) << endl;
+    }
+ return 0;
 }
 
 
@@ -196,16 +210,20 @@ int cd( char *argv[])
 //*****************************************************************************************************************************************
 int printDir(){
 
- char cwd[PATH_MAX];
-   if (getcwd(cwd, sizeof(cwd)) != NULL) {
-       printf("%s >>$CREAM$HELL$>> ", cwd);
-   } else {
-       perror(" \u001b[31m  getcwd() error");
-       return 1;
-   }
+   char cwd[PATH_MAX];
+   if (getcwd(cwd, sizeof(cwd)) != NULL)
+        {
+            printf("%s >>$CREAM$HELL$>>  ", cwd);
+        }   else
+        {
+            printf("\u001b[31m");
+            cout << strerror(errno) << endl;
+            return 1;
+        }// end else
 } // end printDir
 
 int resetColor(){
        //put color back to white for user input
       printf("\x1b[0m");
+      return 0;
 }
