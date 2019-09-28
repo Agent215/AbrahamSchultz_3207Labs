@@ -1,5 +1,6 @@
 # Abraham Schultz
 ## CreamShell
+(Cache Reduces extra memory allotment)
 
 // all that we have here now is testing programs, pseudo code and design documents.
 
