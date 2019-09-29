@@ -2,14 +2,19 @@
 CreamShell.cpp
 Abraham Schultz
 
+This is to be my implementation of a unix style command line interpreter (Shell) program
+
+
 
 
 ./creamShell
 CACHE RULES EVERYTHING AROUND ME
+/CACHE REDUCES EXTRA ALLOTMENT OF MEMORY
 */
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
@@ -28,14 +33,45 @@ using namespace std;
 
 
       //declare array to use to pass to exec
-      char *argv[1000];
+      char *args[1000];
       // errno for use with std error
       extern int errno;
       // path string to set the path for exec
       char *PATH[1000];
+      char * filename;
 
-int main ()
+      // flag to tell shell if we are using a batch file as input
+      int batchFile;
+
+int main (int argc, char *argv[])
         {
+
+      // init as not using batch file
+      batchFile = 0;
+
+      // first check if user provided batch file
+      // if the user provides any arg with the initial execution assume that it is a batch file name
+      if (argc >1)
+      {
+
+          //set flag
+          batchFile =1;
+
+          filename = argv[1];
+          int newstdin = open(filename,O_RDONLY);
+
+              //returns a -1 if an error occurred
+              if (newstdin < 0) {
+              printf("Error: %s\n", strerror(errno));
+              return 0;
+            }
+
+          close(0);
+          dup(newstdin);
+          close(newstdin);
+      }// end if
+
+
 
       // clear terminal on start
       clear();
@@ -48,17 +84,24 @@ int main ()
       printf("\u001b[32m");
       //create a string buf to hold user input
       char* buf;
+
+      // if we are not using a batch file then print prompt otherwise do nothing
+      if (batchFile == 0)
       printDir();
+
+
 
       //user input is white
       resetColor();
       // get user input and wait for user to hit enter
       buf = readline("");
 
+      // if we are using a batch file and it is empty then we are done here
+      if(batchFile == 1 && buf == NULL) {return 0;}
 
 
       // check if echo
-      if(strcmp(buf, "echo") == 0){ echo(buf); }
+       if(strcmp(buf, "echo") == 0){ echo(buf); }
       // parse args
       parseArgs(buf);
       //these will all be under internal command switch
@@ -67,26 +110,26 @@ int main ()
       else // if user entered clr then clear screen. this will be moved the handleInternal() function
       if(strcmp(buf, "clr") == 0){  clear();}
       else
-      if(strcmp(buf, "cd") == 0){  cd(argv);}
+      if(strcmp(buf, "cd") == 0){  cd(args);}
       else
       if(strcmp(buf, "dir") == 0){ dir(); }
       else
-        // if fork returns 0 then this is child, this will be in the exec arg function later
+         //if fork returns 0 then this is child, this will be in the exec arg function later
         if (fork() == 0)
         {
 
                     // if what the user entered doesnt makes sense
-                    if (execvp(argv[0], argv) < 0)
+                    if (execvp(args[0], args) < 0)
                         {
                          //change font to red and print std error
                          printf("\u001b[31m");
                          cout << strerror(errno) << endl;
                          return 0;
                         }                            //we look in the/bin directory where system programs should be
-                        execv("/bin", argv);         // child process becomes what user enters in
+                       	  //this should never print
+                          printf("I am the Child! %i\n", getpid());
+                          //execv("/bin", argv);         // child process becomes what user enters in
 
-             //this should never print
-             printf("I am the Child! %i\n", getpid());
         } // end if child
 
 
@@ -99,7 +142,7 @@ int main ()
         } // end else if parent
 
         // the readline function mallocs memory we must not forget to free this
-        free(buf);
+       free(buf);
 
       } // end while
 
@@ -121,13 +164,13 @@ int main ()
           // break off individual strings using the space as a delimiter until end of line
            while (cmd != NULL)
             {
-            argv[i] = cmd;
+            args[i] = cmd;
            // printf ("%s\n",   cmd);
             cmd = strtok (NULL, " ");
             i ++;
             }
             // set lat array element to null to make exec work correctly
-            argv[i] = NULL;
+            args[i] = NULL;
             return 0;
 
         }// end parseArgs
@@ -192,10 +235,10 @@ int main ()
 
 //*****************************************************************************************************************************************
 // function to change directory
-int cd( char *argv[])
+int cd( char *args[])
 {
 //cout << "change to this directory " << argv[1] << endl;
- if (chdir(argv[1]) == 0 )
+ if (chdir(args[1]) == 0 )
     {
     // we found target directory
 
