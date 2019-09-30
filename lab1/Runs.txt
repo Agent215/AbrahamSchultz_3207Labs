@@ -1,0 +1,50 @@
+RUNS.txt
+
+Abraham Schultz
+Last edited 9/15/2019
+
+This is a file describing the input used to test
+my implementation of a discrete event simulation.
+
+for the first test run i chose the following initial data
+
+SEED 234324
+INIT_TIME 600  // some arbitrary start time not 0 to test programs ability to deal with that
+FIN_TIME 10000 // time of 10,000 seem like enough time to finish at least 100 jobs
+ARRIVE_MIN 1   // a job can come  at almost any time
+ARRIVE_MAX 100 // and but wont wait longer than 100 turns
+QUIT_PROB .2   // the probability a program quits  after done with CPU
+CPU_MIN 1      // this is the fast processing time because modern CPU are the fast component on the computer
+CPU_MAX 10     // choose a multiple of 10
+DISK1_MIN 10    // this will simulate a register which is 10 * slower than the CPU
+DISK1_MAX 100   // this will simulate a register which is 10 * slower than the CPU
+DISK2_MIN 100   // this will simulate a DISK on memory which is 100 * slower than the CPU
+DISK2_MAX 1000  // this will simulate a DISK on memory is 100 * slower than the CPU
+
+This run all my stats looked good my utilization was over 80% across the board
+
+// next i increase the time jobs take to arrive
+
+SEED 2342544234
+INIT_TIME 600
+FIN_TIME 10000
+ARRIVE_MIN 100
+ARRIVE_MAX 1000
+QUIT_PROB .5		//increase quit time
+CPU_MIN 1
+CPU_MAX 10
+DISK1_MIN 10
+DISK1_MAX 100
+DISK2_MIN 100
+DISK2_MAX 1000
+
+After this run we see a major hit on devices actually being used. as we would expect 
+from increase wait times 
+
+I can conclude from this, that quicker service time will increase utilization of the given module.
+
+CPU Utilization: 0.326754.2%
+Disk1 Utilization: 0.548333.2%
+Disk2 Utilization: 0.631930.2%
+%
+

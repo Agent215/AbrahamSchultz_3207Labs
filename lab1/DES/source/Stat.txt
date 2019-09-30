@@ -1,0 +1,52 @@
+STATISTICS FILE
+
+************************************
+************************************
+QUEUE SIZES 
+************************************
+Event Queue maximum size: 152 
+Event Queue Average size: 32 
+
+CPU Queue maximum size: 77 
+CPU Queue Average size: 6 
+
+DISK1 Queue maximum size: 375 
+DISK1 Queue Average size: 49 
+
+DISK2 Queue maximum size: 449 
+DISK2 Queue Average size: 66 
+
+
+************************************
+************************************
+UTILIZATION
+************************************
+TOTAL SIMULATION RUN TIME: 9400
+
+CPU Utilization: 0.546404.2% 
+Disk1 Utilization: 0.760526.2% 
+Disk2 Utilization: 0.791667.2% 
+
+CPU total jobs processed: 1245 
+Disk1 total jobs processed: 161 
+Disk2 total jobs processed: 19 
+
+************************************
+************************************
+THROUGHPUT 
+
+CPU Throughput: 0.200 
+Disk1 Throughput: 0.018570 
+Disk2 Throughput: 0.002105 
+
+************************************
+************************************
+RESPONSE TIME 
+
+CPU longest job: 10 
+DISK1 longest job: 107 
+DISK2 longest job: 1002 
+
+CPU average job: 5.003213.4 
+DISK1 average job: 53.850933.4 
+DISK2 average job: 475.0000004.4 
