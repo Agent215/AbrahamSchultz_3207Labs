@@ -1,11 +1,15 @@
 /*
 CreamShell.cpp
 Abraham Schultz
+last edited 09/29/2019
 
-This is to be my implementation of a unix style command line interpreter (Shell) program
+This is to be my implementation of a Unix style command line interpreter (Shell) program
 
+This file contains the main function which can accept one argument or no arguments when executed.
+If any argument is provided by the user we assume that this is the name of a batch file to read input from
+instead of from the command line.
 
-
+if no arguments are provided then we run normally, waiting for user input from the keyboard.
 
 ./creamShell
 CACHE RULES EVERYTHING AROUND ME
@@ -174,107 +178,3 @@ int main (int argc, char *argv[])
             return 0;
 
         }// end parseArgs
-//*****************************************************************************************************************************************
-        // function to clear screen
-        int clear(){
-        //use escape sequence to clear console
-        printf("\033[H\033[J") ;
-        return 0;
-        }// end clear
-
-//*****************************************************************************************************************************************
-        //function to echo to shell whatever user types
-        int echo(char* args)
-        {
-
-         printf("%s",args);
-
-         return 0;
-        }// end echo
-
-//*****************************************************************************************************************************************
-//function that is equivlent to linux ls command
-// this prints out the files in the current working directory.
-       int dir()
-       {
-       struct dirent *ent;  // Pointer for directory entry
-        //set color of file txt :)
-        printf("\u001b[34m");
-        // opendir() returns a pointer of DIR type.
-        DIR *newDir = opendir(".");
-
-        if (newDir == NULL)  // opendir returns NULL if couldn't open directory
-        {
-                        //change font to red and print std error
-                         printf("\u001b[31m");
-                         cout << strerror(errno) << endl;
-
-        } // end if
-
-        int i =0;
-        // use readdir to look at current files in directory any print them out
-        while ((ent = readdir(newDir)) != NULL)
-            {
-
-            if ( !strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..") )
-                {
-                     // dont print the current directoy and parent directory
-                } else {
-                    printf("%s   ", ent->d_name);
-                    i++;
-                } // end if else
-
-
-            }// end while
-
-        printf("\n\u001b[32m");// put color back to green
-        closedir(newDir);
-        return 0;
-
-       }// end dir
-
-//*****************************************************************************************************************************************
-// function to change directory
-int cd( char *args[])
-{
-//cout << "change to this directory " << argv[1] << endl;
- if (chdir(args[1]) == 0 )
-    {
-    // we found target directory
-
-    } else
-    {
-         //change font to red and print std error
-        printf("\u001b[31m");
-        cout << strerror(errno) << endl;
-    }
- return 0;
-}// end cd
-
-
-
-
-
-//*****************************************************************************************************************************************
-int printDir(){
-
-   char cwd[PATH_MAX];
-   if (getcwd(cwd, sizeof(cwd)) != NULL)
-        {
-            printf("%s >>$CREAM$HELL$>>  ", cwd);
-        }   else
-        {
-            //change font to red and print std error
-            printf("\u001b[31m");
-            cout << strerror(errno) << endl;
-            return 1;
-        }// end else
-} // end printDir
-
-
-//*****************************************************************************************************************************************
-int resetColor(){
-       //put color back to white for user input
-      printf("\x1b[0m");
-      return 0;
-}// end resetColor
