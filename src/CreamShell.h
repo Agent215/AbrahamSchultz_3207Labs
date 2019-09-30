@@ -37,8 +37,9 @@ int echo(char* args);
 // HandleExternal()
 int parseArgs(char* buf) ;
 int printDir();
-//execArg()
+int execArgs(char * args[]);
 //handle &
 //parseRedrirect
+int execRedirect();
 //parsePipe()
 int resetColor();

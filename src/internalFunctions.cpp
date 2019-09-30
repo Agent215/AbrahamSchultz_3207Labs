@@ -25,17 +25,16 @@ for my Unix style CLI program (command line interpreter ).
 #include <errno.h>
 #include "CreamShell.h"
 
+using namespace std;
 
 
 //*****************************************************************************************************************************************
-        // function to clear screen
+        // function to clear screen, using ANSI escape sequences
         int clear(){
         //use escape sequence to clear console
         printf("\033[H\033[J") ;
         return 0;
         }// end clear
-
-
 
 //*****************************************************************************************************************************************
         //function to echo to shell whatever user types
@@ -48,11 +47,12 @@ for my Unix style CLI program (command line interpreter ).
         }// end echo
 
 //*****************************************************************************************************************************************
-//function that is equivlent to linux ls command
+//function that is equivalent to Linux ls command
 // this prints out the files in the current working directory.
        int dir()
        {
-       struct dirent *ent;  // Pointer for directory entry
+        struct dirent *ent;      // Pointer for directory entry
+
         //set color of file txt :)
         printf("\u001b[34m");
         // opendir() returns a pointer of DIR type.
@@ -89,6 +89,7 @@ for my Unix style CLI program (command line interpreter ).
        }// end dir
 
 //*****************************************************************************************************************************************
+//function to print the directory name and prompt the user
 int printDir(){
 
    char cwd[PATH_MAX];
@@ -106,16 +107,19 @@ int printDir(){
 
 
 //*****************************************************************************************************************************************
+// this is a helper function to set terminal text back to white using ANSI escape sequences
 int resetColor(){
        //put color back to white for user input
       printf("\x1b[0m");
       return 0;
 }// end resetColor
+
 //*****************************************************************************************************************************************
 // function to change directory
+//utilizes the chdir() function and gets passes a directory name to change too
 int cd( char *args[])
 {
-//cout << "change to this directory " << argv[1] << endl;
+
  if (chdir(args[1]) == 0 )
     {
     // we found target directory
