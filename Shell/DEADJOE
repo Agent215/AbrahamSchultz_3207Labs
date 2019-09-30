@@ -1,0 +1,22 @@
+
+*** These modified files were found in JOE when it aborted on Sat Sep 28 22:10:32 2019
+*** JOE was aborted because the terminal closed
+
+*** File '(Unnamed)'
+/home/TU/tuk85386/3207/AbrahamSchultz_CreamShell/.git/MERGE_MSG
+
+*** File '/home/TU/tuk85386/3207/AbrahamSchultz_CreamShell/.git/MERGE_MSG'
+
+Merge branch 'master' of https://github.com/Agent215/AbrahamSchultz_CreamShell
+
+# Please enter a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+
+*** File '* Startup Log *'
+Processing '/etc/joe/editorrc'...
+Processing '/etc/joe/ftyperc'...
+Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/editorrc

@@ -79,7 +79,7 @@ using namespace std;
                     i++;
                 } // end if else
 
-
+			 
             }// end while
 
         printf("\n\u001b[32m");// put color back to green
@@ -95,6 +95,10 @@ int printDir(){
    char cwd[PATH_MAX];
    if (getcwd(cwd, sizeof(cwd)) != NULL)
         {
+
+
+	         // use escape sequence to change terminal color to green for prompt
+	        printf("\u001b[32m");
             printf("%s >>$CREAM$HELL$>>  ", cwd);
         }   else
         {

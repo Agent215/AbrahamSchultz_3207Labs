@@ -53,6 +53,7 @@ int main (int argc, char *argv[])
 
       // init as not using batch file
       batchFile = 0;
+	  execNow - 0;
 
           // first check if user provided batch file
           // if the user provides any arg with the initial execution assume that it is a batch file name
@@ -121,8 +122,13 @@ int main (int argc, char *argv[])
           if(strcmp(buf, "dir") == 0){ dir(); }
           // call regular exec args function
           else {   rtrn == execArgs(args);}
-          // only wait if we didnt get an &
-          if (rtrn > 0) { if(execNow != 1) {wait(NULL);};}
+          // if exec worked
+          if (rtrn > 0) 
+		  {   // check if we waiting
+			  if(execNow != 1) 
+			  {wait(NULL);} 
+			  else { cout << "exec imiditatly" << endl; }
+		  }
 
            // the readline function mallocs memory we must not forget to free this
            free(buf);
@@ -168,8 +174,16 @@ int main (int argc, char *argv[])
 
                 args[i] = cmd;
                // printf ("%s\n",   cmd);
-                 if (cmd=="&"){execNow = 1; cout << "detected ampersand" << endl;}
+				if (strcmp(cmd, "&") == 0) {
+					execNow = 1; cout << "detected ampersand" << endl;
+					//position of blank space
+					size_t amper = buf.find("&");
+
+					break;
+				}
                 cmd = strtok (NULL, " ");
+				
+			
                 i ++;
 //                }
 
