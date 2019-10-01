@@ -37,13 +37,14 @@ using namespace std;
 
 
 
-      char *args[1000];     //declare array to use to pass to exec
-      char *args2[1000];     //declare array to use to pass to exec for second set of commands
-      extern int errno;     // errno for use with std error
-      char *PATH[1000];     // path string to set the path for exec
+      char *args[1000];      // declare array to use to pass to exec
+      char *args2[1000];     // declare array to use to pass to exec for second set of commands
+      extern int errno;      // errno for use with std error
+      char *PATH[1000];      // path string to set the path for exec
       char * filename;
-      int batchFile;    // flag to tell shell if we are using a batch file as input
-      int execNow;      //flag is 1 if we detect & at end of args
+      int batchFile;         // flag to tell shell if we are using a batch file as input
+      int execNow;           // flag is 1 if we detect & at end of args
+      int multipleArgs;      // 1 if we have more than one argument per line
 
 //*****************************************************************************************************************************************
 //*****************************************************************************************************************************************
@@ -53,7 +54,7 @@ int main (int argc, char *argv[])
 
       // init as not using batch file
       batchFile = 0;
-	  execNow - 0;
+	  execNow = 0;
 
           // first check if user provided batch file
           // if the user provides any arg with the initial execution assume that it is a batch file name
@@ -86,7 +87,8 @@ int main (int argc, char *argv[])
       int running = 0;
 
       while (running == 0 ){
-             int rtrn;
+
+          int rtrn;
           // use escape sequence to change terminal color to green for prompt
           printf("\u001b[32m");
           //create a string buf to hold user input
@@ -103,30 +105,30 @@ int main (int argc, char *argv[])
           // get user input and wait for user to hit enter
           buf = readline("");
 
-          // if we are using a batch file and it is empty then we are done here
-          if(batchFile == 1 && buf == NULL) {return 0;}
-
-
-          // check if echo
+           // if we are using a batch file and it is empty then we are done here
+           if(batchFile == 1 && buf == NULL) {return 0;}
+           // check if echo
            if(strcmp(buf, "echo") == 0){ echo(buf); }
-          // parse args
-          parseArgs(buf);
-          //these will all be under internal command switch
-          // if user wants to exit type exit
+           // parse args
+           parseArgs(buf);
+           //these will all be under internal command switch
+           // if user wants to exit type exit
           if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\ngoodbye \n"); break; }
           else // if user entered clr then clear screen. this will be moved the handleInternal() function
           if(strcmp(buf, "clr") == 0){  clear();}
           else
           if(strcmp(buf, "cd") == 0){  cd(args);}
           else
+          if(strcmp(buf, "envr") == 0){ envr();}
+          else
           if(strcmp(buf, "dir") == 0){ dir(); }
           // call regular exec args function
           else {   rtrn == execArgs(args);}
           // if exec worked
-          if (rtrn > 0) 
+          if (rtrn > 0)
 		  {   // check if we waiting
-			  if(execNow != 1) 
-			  {wait(NULL);} 
+			  if(execNow != 1)
+			  {wait(NULL);}
 			  else { cout << "exec imiditatly" << endl; }
 		  }
 
@@ -143,55 +145,87 @@ int main (int argc, char *argv[])
 //*****************************************************************************************************************************************
         // this will be the function to tokenize input from the user into discreet arguments
 
+
         int parseArgs(char* buf)
         {
-           int i = 0;
+            int i = 0;
+            string firstArg;
+            string secondArg;
+            char* tmp = buf;
+
+           // convert to c++ style string because we can use fancy c++ std namespace to parse
+           // we should split the large string in two two strings one for each command
+
+
+
+
+              // for now just check if we are appending
+              // if (checkForRedirect(tmp) == 0){
+//               string s (tmp);
+//             //position of redirection symbol
+//             size_t appenRe = s.find(">");
+//             firstArg = s.substr(0, s.find(">"));
+//
+//            // second arg
+//              secondArg =  s.substr(appenRe);
+//              tmp = strdup(firstArg.c_str());
+          //  }
+
+
+
+            /*
+            so because .c_str() function returns a pointer
+            and strtok takes the literal string we use a temp variable
+            to hold the string containing the first argument up until we hit the indicated delimiter
+            */
 
             char * cmd;
-            cmd = strtok (buf," ");
+            cmd = strtok(buf," ");
             // break off individual strings using the space as a delimiter until end of line
             while (cmd != NULL)
             {
 
 
-//                //check for redirection
-//                if (args[i]==">"){
-//
-//                }
-//                else
-//                if (args[i]==">>"){
-//
-//                }
-//                else
-//                if (args[i]=="<"){
-//
-//                }
-//                else
-//                if (args[i]=="<<"){}
-//
-//             else{
-
-
-                args[i] = cmd;
-               // printf ("%s\n",   cmd);
-				if (strcmp(cmd, "&") == 0) {
-					execNow = 1; cout << "detected ampersand" << endl;
-					//position of blank space
-					size_t amper = buf.find("&");
-
-					break;
-				}
+                    args[i] = cmd;
+                    // printf ("%s\n",   cmd);
+                    if (strcmp(cmd, "&") == 0)
+                        {
+                        execNow = 1; cout << "detected ampersand" << endl;
+                        break;
+                        }
                 cmd = strtok (NULL, " ");
-				
-			
                 i ++;
-//                }
 
             }// end while
+             args[i] = NULL;
+//
+//            // for now only break up second argument when > symbol is found
+//            if (checkForRedirect == 0)
+//                {
+//                    i = 0;
+//                    // here we break up the second command and its arguments if provided
+//                    tmp = strdup(secondArg.c_str());
+//                    cmd = strtok(tmp," ");
+//                    while (cmd != NULL)
+//                    {
+//
+//                            args2[i] = cmd;
+//                            // printf ("%s\n",   cmd);
+//                            if (strcmp(cmd, "&") == 0)
+//                                {
+//                                execNow = 1; cout << "detected ampersand" << endl;
+//                                break;
+//                                }
+//                        cmd = strtok (NULL, " ");
+//                        i ++;
+//
+//
+//
+//                    } // end while
+//                    args2[i] = NULL;
+//                    // set lat array element to null to make exec work correctly
+//                 } // end if
 
-            // set lat array element to null to make exec work correctly
-
-            args[i] = NULL;
             return 0;
 
         }// end parseArgs
@@ -217,7 +251,6 @@ int execArgs(char * argsIn[]){
                               //this should never print
                               printf("I am the Child! %i\n", getpid());
 
-
             } // end if child
 
 
@@ -225,3 +258,60 @@ int execArgs(char * argsIn[]){
 //*****************************************************************************************************************************************
 //*****************************************************************************************************************************************
 //int execRedirect(){}// end execRedirect()
+
+
+// this function will check is there is a redirect symbol will return
+// 0 = >
+// 1 = >>
+// 2 = <
+// 3 = <<
+//  -1 = no redirect
+int checkForRedirect(char* in){
+
+
+int returnVal = -1;
+char * cmd;
+cmd = strtok(in," ");
+
+// we will break apart a copy of the whole line input by the user
+ while (cmd != NULL)
+            {
+
+
+                    if (strcmp(cmd, ">") == 0)
+                        {
+                        returnVal = 0; cout << "> detected" << endl;
+                        return returnVal;
+                        break;
+                        }else
+                    if(strcmp(cmd, ">>") == 0)
+                        {
+                        returnVal = 1; cout << ">> detected" << endl;
+                        return returnVal;
+                        break;
+                        }
+                    else
+                    if(strcmp(cmd, "<") == 0)
+                        {
+                        returnVal = 2; cout << "< detected" << endl;
+                        return returnVal;
+                        break;
+                        }
+                        else
+                    if(strcmp(cmd, ">>") == 0)
+                        {
+                        returnVal = 3; cout << "<< detected" << endl;
+                        return returnVal;
+                        break;
+                        }
+                        else {
+
+                            returnVal = -1;
+                        }
+                cmd = strtok (NULL, " ");
+
+            }// end while
+
+ return returnVal;
+
+}// end checkForRedirect

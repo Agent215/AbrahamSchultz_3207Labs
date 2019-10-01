@@ -28,7 +28,7 @@ int clear();
 // help()
 // pause()
 int dir();
-// env()
+void envr();
 int cd( char *argv[]);
 int echo(char* args);
 // getUserInput ()
@@ -39,7 +39,7 @@ int parseArgs(char* buf) ;
 int printDir();
 int execArgs(char * args[]);
 //handle &
-//parseRedrirect
+int checkForRedirect(char* buf);
 int execRedirect();
 //parsePipe()
 int resetColor();

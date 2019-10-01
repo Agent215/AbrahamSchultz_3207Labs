@@ -79,7 +79,7 @@ using namespace std;
                     i++;
                 } // end if else
 
-			 
+
             }// end while
 
         printf("\n\u001b[32m");// put color back to green
@@ -137,3 +137,33 @@ int cd( char *args[])
  return 0;
 }// end cd
 //*****************************************************************************************************************************************
+// function to list all the linux environment variables
+// print the environment strings
+/* •Current user
+ * •User’s home path
+ * •Shell name
+ * •OS type
+ * •Hostname
+ * •Directories to search to find an executable.
+ */
+
+void envr(){
+
+char* Path;
+char* User;
+char* Shell;
+char* OsType;
+char* Host;
+
+
+ Path = getenv ("PATH");
+ User = getenv("USER");
+ Shell = getenv ("SHELL");
+ OsType = getenv ("OSTYPE");
+ Host = getenv("HOST");
+
+
+printf ("PATH=%s\nUSER=%s\nSHELL=%s\nOSTYPE=%s\nHOST=%s\n",Path,User,Shell,OsType,Host);
+
+
+}// end env

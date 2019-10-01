@@ -1,7 +1,8 @@
-cat CreamShell.cpp
-ls
-ls
-ls
-
+echo testing echo
+dir
+cat makefile
+echo lines in main program
+wc -l CreamShell.cpp
+envr
 
 
