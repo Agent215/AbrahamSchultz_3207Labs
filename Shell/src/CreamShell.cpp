@@ -88,6 +88,7 @@ int main (int argc, char *argv[])
 
       while (running == 0 ){
 
+          execNow = 0;
           int rtrn;
           // use escape sequence to change terminal color to green for prompt
           printf("\u001b[32m");
@@ -97,9 +98,6 @@ int main (int argc, char *argv[])
           // if we are not using a batch file then print prompt otherwise do nothing
           if (batchFile == 0)
           printDir();
-
-
-
           //user input is white
           resetColor();
           // get user input and wait for user to hit enter
@@ -127,7 +125,7 @@ int main (int argc, char *argv[])
           // if exec worked
           if (rtrn > 0)
 		  {   // check if we waiting
-			  if(execNow != 1)
+			  if(execNow == 0)
 			  {wait(NULL);}
 			  else { cout << "exec imiditatly" << endl; }
 		  }
@@ -151,27 +149,31 @@ int main (int argc, char *argv[])
             int i = 0;
             string firstArg;
             string secondArg;
-            char* tmp = buf;
+            //copy the whole line from the user
+            char* tmp  = strdup(buf);
 
-           // convert to c++ style string because we can use fancy c++ std namespace to parse
-           // we should split the large string in two two strings one for each command
+               // convert to c++ style string because we can use fancy c++ std namespace to parse
+               // we should split the large string in two two strings one for each command
+               int check = checkForRedirect(tmp);
+               // for now just check if we are appending
+               if (check== 0){
+				   cout << "this should print " << endl;
+               string s (buf);
+               //position of redirection symbol
+               size_t appenRe = s.find(">");
+               firstArg = s.substr(0, appenRe);
 
-
-
-
-              // for now just check if we are appending
-              // if (checkForRedirect(tmp) == 0){
-//               string s (tmp);
-//             //position of redirection symbol
-//             size_t appenRe = s.find(">");
-//             firstArg = s.substr(0, s.find(">"));
-//
-//            // second arg
-//              secondArg =  s.substr(appenRe);
-//              tmp = strdup(firstArg.c_str());
-          //  }
+               // second arg
+              secondArg =  s.substr(appenRe);
+              tmp = strdup(firstArg.c_str());
 
 
+                 printf("first arg is %s", firstArg.c_str());
+                 printf("second arg is %s", secondArg.c_str());
+            }
+
+               // printf("first arg is %s", firstArg.c_str());
+                // printf("second arg is %s", secondArg.c_str());
 
             /*
             so because .c_str() function returns a pointer
@@ -192,39 +194,40 @@ int main (int argc, char *argv[])
                         {
                         execNow = 1; cout << "detected ampersand" << endl;
                         break;
-                        }
+                        } else{execNow = 0;}
                 cmd = strtok (NULL, " ");
                 i ++;
 
             }// end while
              args[i] = NULL;
-//
-//            // for now only break up second argument when > symbol is found
-//            if (checkForRedirect == 0)
-//                {
-//                    i = 0;
-//                    // here we break up the second command and its arguments if provided
-//                    tmp = strdup(secondArg.c_str());
-//                    cmd = strtok(tmp," ");
-//                    while (cmd != NULL)
-//                    {
-//
-//                            args2[i] = cmd;
-//                            // printf ("%s\n",   cmd);
-//                            if (strcmp(cmd, "&") == 0)
-//                                {
-//                                execNow = 1; cout << "detected ampersand" << endl;
-//                                break;
-//                                }
-//                        cmd = strtok (NULL, " ");
-//                        i ++;
-//
-//
-//
-//                    } // end while
-//                    args2[i] = NULL;
-//                    // set lat array element to null to make exec work correctly
-//                 } // end if
+
+            // for now only break up second argument when > symbol is found
+            if (checkForRedirect(tmp) == 0)
+                {
+                    i = 0;
+                    // here we break up the second command and its arguments if provided
+                    tmp = strdup(secondArg.c_str());
+                    cmd = strtok(tmp," ");
+                    while (cmd != NULL)
+                    {
+
+                            args2[i] = cmd;
+                            printf ("%s\n",   cmd);
+                            if (strcmp(cmd, "&") == 0)
+                                {
+                                execNow = 1; cout << "detected ampersand" << endl;
+                                break;
+                                }
+                        cmd = strtok (NULL, " ");
+                        i ++;
+
+
+
+                    } // end while
+                    args2[i] = NULL;
+                    // set lat array element to null to make exec work correctly
+                 } // end if
+
 
             return 0;
 
@@ -281,28 +284,32 @@ cmd = strtok(in," ");
                     if (strcmp(cmd, ">") == 0)
                         {
                         returnVal = 0; cout << "> detected" << endl;
+						cout << "this shold be the return value of 0 " << returnVal << endl;
                         return returnVal;
-                        break;
+                    
                         }else
                     if(strcmp(cmd, ">>") == 0)
                         {
                         returnVal = 1; cout << ">> detected" << endl;
+						cout << "this shold be the return value of 1 " << returnVal << endl;
                         return returnVal;
-                        break;
+                     
                         }
                     else
                     if(strcmp(cmd, "<") == 0)
                         {
                         returnVal = 2; cout << "< detected" << endl;
+						cout << "this shold be the return value of 2 " << returnVal << endl;
                         return returnVal;
-                        break;
+                     
                         }
                         else
                     if(strcmp(cmd, ">>") == 0)
                         {
                         returnVal = 3; cout << "<< detected" << endl;
+						cout << "this shold be the return value of 3 " << returnVal << endl;
                         return returnVal;
-                        break;
+                    
                         }
                         else {
 
