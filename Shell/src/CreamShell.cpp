@@ -45,6 +45,7 @@ using namespace std;
       int batchFile;         // flag to tell shell if we are using a batch file as input
       int execNow;           // flag is 1 if we detect & at end of args
       int multipleArgs;      // 1 if we have more than one argument per line
+      int isPaused;
 
 //*****************************************************************************************************************************************
 //*****************************************************************************************************************************************
@@ -55,6 +56,7 @@ int main (int argc, char *argv[])
       // init as not using batch file
       batchFile = 0;
 	  execNow = 0;
+	  isPaused = 0;
 
           // first check if user provided batch file
           // if the user provides any arg with the initial execution assume that it is a batch file name
@@ -111,24 +113,24 @@ int main (int argc, char *argv[])
            parseArgs(buf);
            //these will all be under internal command switch
            // if user wants to exit type exit
-          if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\ngoodbye \n"); break; }
-          else // if user entered clr then clear screen. this will be moved the handleInternal() function
-          if(strcmp(buf, "clr") == 0){  clear();}
-          else
-          if(strcmp(buf, "cd") == 0){  cd(args);}
-          else
-          if(strcmp(buf, "envr") == 0){ envr();}
-          else
-          if(strcmp(buf, "dir") == 0){ dir(); }
-          // call regular exec args function
-          else {   rtrn == execArgs(args);}
-          // if exec worked
-          if (rtrn > 0)
-		  {   // check if we waiting
+           if(strcmp(buf, "exit") == 0){  running =1 ;  printf("\ngoodbye \n"); break; }
+           else // if user entered clr then clear screen. this will be moved the handleInternal() function
+           if(strcmp(buf, "clr") == 0){  clear();}
+           else
+           if(strcmp(buf, "cd") == 0){  cd(args);}
+           else
+           if(strcmp(buf, "envr") == 0){ envr();}
+           else
+           if(strcmp(buf, "dir") == 0){ dir(); }
+           // call regular exec args function
+           else {   rtrn == execArgs(args);}
+           // if exec worked
+           if (rtrn > 0)
+		   {   // check if we waiting
 			  if(execNow == 0)
 			  {wait(NULL);}
 			  else { cout << "exec imiditatly" << endl; }
-		  }
+		   }
 
            // the readline function mallocs memory we must not forget to free this
            free(buf);
@@ -152,16 +154,16 @@ int main (int argc, char *argv[])
             //copy the whole line from the user
             char* tmp  = strdup(buf);
 
-               // convert to c++ style string because we can use fancy c++ std namespace to parse
-               // we should split the large string in two two strings one for each command
-               int check = checkForRedirect(tmp);
-               // for now just check if we are appending
-               if (check== 0){
-				   cout << "this should print " << endl;
-               string s (buf);
-               //position of redirection symbol
-               size_t appenRe = s.find(">");
-               firstArg = s.substr(0, appenRe);
+               //this is probably no the best way to parse multiple arguments but its a method i have used before
+               int check = checkForRedirect(tmp);                // check the input for redirection symbol
+
+               if (check== 0){                                   // 0 = > so we are redirecting
+
+               string s (buf);                                   // convert to c++ style string because we can use fancy c++ std namespace to parse
+
+               size_t appenRe = s.find(">");                     // index position of redirection symbol in large string
+
+               firstArg = s.substr(0, appenRe);                  // we should split the large string in two two strings one for each command
 
                // second arg
               secondArg =  s.substr(appenRe);
@@ -172,24 +174,17 @@ int main (int argc, char *argv[])
                  printf("second arg is %s", secondArg.c_str());
             }
 
-               // printf("first arg is %s", firstArg.c_str());
-                // printf("second arg is %s", secondArg.c_str());
-
             /*
             so because .c_str() function returns a pointer
             and strtok takes the literal string we use a temp variable
             to hold the string containing the first argument up until we hit the indicated delimiter
             */
-
             char * cmd;
             cmd = strtok(buf," ");
             // break off individual strings using the space as a delimiter until end of line
             while (cmd != NULL)
             {
-
-
                     args[i] = cmd;
-                    // printf ("%s\n",   cmd);
                     if (strcmp(cmd, "&") == 0)
                         {
                         execNow = 1; cout << "detected ampersand" << endl;
@@ -202,7 +197,7 @@ int main (int argc, char *argv[])
              args[i] = NULL;
 
             // for now only break up second argument when > symbol is found
-            if (checkForRedirect(tmp) == 0)
+            if (check == 0)
                 {
                     i = 0;
                     // here we break up the second command and its arguments if provided
@@ -284,32 +279,32 @@ cmd = strtok(in," ");
                     if (strcmp(cmd, ">") == 0)
                         {
                         returnVal = 0; cout << "> detected" << endl;
-						cout << "this shold be the return value of 0 " << returnVal << endl;
+
                         return returnVal;
-                    
+
                         }else
                     if(strcmp(cmd, ">>") == 0)
                         {
                         returnVal = 1; cout << ">> detected" << endl;
-						cout << "this shold be the return value of 1 " << returnVal << endl;
+
                         return returnVal;
-                     
+
                         }
                     else
                     if(strcmp(cmd, "<") == 0)
                         {
                         returnVal = 2; cout << "< detected" << endl;
-						cout << "this shold be the return value of 2 " << returnVal << endl;
+
                         return returnVal;
-                     
+
                         }
                         else
                     if(strcmp(cmd, ">>") == 0)
                         {
                         returnVal = 3; cout << "<< detected" << endl;
-						cout << "this shold be the return value of 3 " << returnVal << endl;
+
                         return returnVal;
-                    
+
                         }
                         else {
 
