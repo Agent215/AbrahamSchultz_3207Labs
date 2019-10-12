@@ -45,6 +45,7 @@ using namespace std;
       int execNow;           // flag is 1 if we detect & at end of args
       int multipleArgs;      // 1 if we have more than one argument per line
       int redirecting;        // 1 if redirecting
+      int redirectionType;    // int to indicate what type of redirection we are doing
       int piping;            // 1 if piping
       int isPaused;          // 1 if paused
 
@@ -84,6 +85,9 @@ int main (int argc, char *argv[])
               close(newstdin);
           }// end if
 
+
+
+
       // clear terminal on start
       clear();
 
@@ -94,7 +98,9 @@ int main (int argc, char *argv[])
         {
            // asdasd
            redirecting = 0;
+           redirectionType = -1;
            execNow = 0;
+           swh =1;
            int rtrn;
 
 
@@ -121,7 +127,11 @@ int main (int argc, char *argv[])
             // check for null stuff before going to internal commands switch
             if (buf != NULL && args != NULL)
             swh = intrnFunc( tmp, args);
-            if (swh == 0){  // i we used an internal command dont do anything
+            if (swh == 0){
+
+
+
+                    // i we used an internal command dont do anything
             }
             else
             if (swh == 2)  // if we reutn 2 then we chose to exit
@@ -134,28 +144,30 @@ int main (int argc, char *argv[])
             } // if we return 3 then we paused
             else
 
-           if(redirecting == 0 && swh == 1 )      // if we are not redirecting , and its not an internal command
+           if(redirecting == 0 )      // if we are not redirecting , and its not an internal command
             {   rtrn == execArgs(args);}         // then exec like only one command
            else
-           // if we are redirecting then parse the two commands we need to redirect input and output too
-//            if (redirecting == 1)
-//           {
-//             execArgsRedirect(args,args2);
-//           }
+           // if we are redirecting then and not using internal then redirect for external
+            if ((redirecting == 1) &&(swh == 1))
+           {
+
+             execArgsRedirect(args,args2);
+           }
            // if exec worked
            if (rtrn > 0)
 		   {   // check if we waiting
 			  if(execNow == 0)
 			  {
-
-                    {wait(NULL);}
-                    {wait(NULL);}
+//
+//                    {wait(NULL);}
+//                    {wait(NULL);}
 	          }
 			  else { cout << "exec imiditatly" << endl; }
 		   }
 
            // the readline function mallocs memory we must not forget to free this
            free(buf);
+           free(tmp);
       } // end while
 
       // change color back to normal on console using escape sequences
@@ -167,7 +179,6 @@ int main (int argc, char *argv[])
 //*****************************************************************************************************************************************
         // this will be the function to tokenize input from the user into discreet arguments
 
-
         int parseArgs(char* buf)
         {
             int i = 0;
@@ -177,7 +188,8 @@ int main (int argc, char *argv[])
             char* tmp  = strdup(buf);
 
                //this is probably no the best way to parse multiple arguments but its a method i have used before
-               int check = checkForRedirect(tmp);                // check the input for redirection symbol
+
+               int check =  checkForRedirect(tmp);            // check the input for redirection symbol
 
                if (check== 0){                                   // 0 = > so we are redirecting
 
@@ -207,6 +219,7 @@ int main (int argc, char *argv[])
                tmp = strdup(firstArg.c_str());
                cmd = strtok(tmp," ");
                } else {   cmd = strtok(buf," "); }
+
 
 
 
@@ -316,6 +329,7 @@ cmd = strtok(in," ");
                         {
                         returnVal = 0; cout << "> detected" << endl;
                         redirecting =1;
+                        redirectionType = 0;
                         return returnVal;
 
                         }else
@@ -323,6 +337,7 @@ cmd = strtok(in," ");
                         {
                         returnVal = 1; cout << ">> detected" << endl;
                         redirecting =1;
+                         redirectionType = 1;
                         return returnVal;
 
                         }
@@ -331,6 +346,7 @@ cmd = strtok(in," ");
                         {
                         returnVal = 2; cout << "< detected" << endl;
                         redirecting =1;
+                         redirectionType = 2;
                         return returnVal;
 
                         }
@@ -339,12 +355,14 @@ cmd = strtok(in," ");
                         {
                         returnVal = 3; cout << "<< detected" << endl;
                         redirecting =1;
+                         redirectionType = 3;
                         return returnVal;
 
                         }
                         else {
                             redirecting =0;
                             returnVal = -1;
+
                         }
                 cmd = strtok (NULL, " ");
 
@@ -362,33 +380,45 @@ cmd = strtok(in," ");
 // takes an array of string where the first is the command the following strings are the arguments for each command
 int execArgsRedirect(char * args1In[],char * args2In[]){
 
-
-int fds[2]; // file descriptors
-int count;  //
-int fd;     //
-char c;     //
+char * file ;
+int newstout;
 
 pid_t pid1;  // associated pids to wait
 pid_t pid2;
+
+
+//filename to redirect too is first arg of second cmd string
+
+file = args2In[0];
+cout << "file to redirect to " << filename << endl;
 
  //first child for first command
  if ((pid1 = fork()) == 0)
       {
 
-//
-////
-//          fd = open(fds[0], O_RDWR | O_CREAT, 0666);
-////
-////           // open() returns a -1 if an error occurred
-//          if (fd < 0) {
-//                      printf("Error: %s\n", strerror(errno));
-//                      return 0;
-//                      }
-//
-//          dup2(fds[0], 0);
-//
-////         Don't need stdout end of pipe.
-//        close(fds[1]);
+                // if we are changing output for redirection of external commands
+                if (redirectionType  == 0 || redirectionType == 1) {
+
+
+                      // check for > or >> to append or truncate file for redirection
+              if ( redirectionType == 0)
+              newstout = open(file, O_WRONLY| O_CREAT, 0666 | O_APPEND, S_IRWXG | S_IRWXO);
+              if ( redirectionType == 1)
+              newstout = open(file, O_WRONLY| O_CREAT, 0666 | O_TRUNC, S_IRWXG | S_IRWXO);
+
+                //returns a -1 if an error occurred
+               if (newstout < 0) {
+                            printf("Error: %s\n", strerror(errno));
+                            return 0;
+                    }
+
+              close(1);
+              dup2(newstout,1);
+              close(newstout);
+
+
+                }
+
 
 
                         // if what the user entered doesnt makes sense
@@ -400,46 +430,19 @@ pid_t pid2;
                              exit(10);
                              return 0;
 
-                            }                            //we look in the/bin directory where system programs should be
+                            }
                               //this should never print
                               printf("I am the Child! %i\n", getpid());
            }
-                        else if ((pid2 = fork()) == 0)
-
-             {
-
-
-
-                        // if what the user entered doesnt makes sense
-                        if (execvp(args2In[0], args2In) < 0)
-                            {
-                             //change font to red and print std error
-                             printf("\u001b[31m");
-                             cout << strerror(errno) << endl;
-                             exit(10);
-                             return 0;
-
-                            }                            //we look in the/bin directory where system programs should be
-                              //this should never print
-                              printf("I am the Child! %i\n", getpid());
-
-            }// end if child
-            else {
-
-
-
-
+        else {
 
                  if(execNow == 0)
 			  {
 
                     {wait(NULL);}
-                    {wait(NULL);}
+                //    {wait(NULL);}
               }
             }
-
-
-
 
 
 //                waitpid(pid1, NULL, 0);
@@ -447,10 +450,7 @@ pid_t pid2;
 //
 
 
-
-
-
-} // end execArgs
+} // end RedirectexecArgs
 
 
 

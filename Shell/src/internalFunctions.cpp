@@ -60,13 +60,13 @@ using namespace std;
            else                                     // if user entered clr then clear screen. this will be moved the handleInternal() function
            if(strcmp(cmd, "clr") == 0){  clear();return 0;}
            else
-           if(strcmp(args[0], "cd") == 0){ cout << " args for cd " << args[1]<<endl; cd(args);return 0;}
+           if(strcmp(args[0], "cd") == 0){  cd(args);return 0;}
            else
            if(strcmp(cmd, "envr") == 0){ envr();return 0;}
            else
            if(strcmp(cmd, "dir") == 0){ dir();return 0 ;}
            else
-           if(strcmp(cmd, "help") == 0){ help();return 0 ;}
+           if(strcmp(args[0], "help") == 0){ help();return 0 ;}
            else  if(strcmp(cmd, "pause") == 0){ return 3 ;}
            else {return 1;}
             }
@@ -82,7 +82,7 @@ using namespace std;
   // Help command
 int help()
 {
-    puts("\n***WELCOME TO CREAM SHELL HELP***"
+    printf("\n***WELCOME TO CREAM SHELL HELP***"
         "\n-Use the shell at your own risk..."
         "\nList of Commands supported:"
         "\n>cd"
@@ -96,7 +96,7 @@ int help()
         "\n>all other general commands available in UNIX shell"
         "\n>pipe handling"
         "\n>redirection"
-        "\n>batch file support");
+        "\n>batch file support \n");
 
     return 0;
 }
