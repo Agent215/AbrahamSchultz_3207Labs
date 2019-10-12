@@ -46,6 +46,61 @@ using namespace std;
          return 0;
         }// end echo
 
+
+
+//*****************************************************************************************************************************************
+   int intrnFunc(char* cmd,char  * args[] )
+        {
+
+            if (cmd != NULL && args[0] != NULL)
+            {
+           if(strcmp(cmd, "echo") == 0){ echo(cmd); return 0;}else
+
+           if(strcmp(cmd, "exit") == 0){   printf("\ngoodbye \n"); return 2 ;}
+           else                                     // if user entered clr then clear screen. this will be moved the handleInternal() function
+           if(strcmp(cmd, "clr") == 0){  clear();return 0;}
+           else
+           if(strcmp(args[0], "cd") == 0){ cout << " args for cd " << args[1]<<endl; cd(args);return 0;}
+           else
+           if(strcmp(cmd, "envr") == 0){ envr();return 0;}
+           else
+           if(strcmp(cmd, "dir") == 0){ dir();return 0 ;}
+           else
+           if(strcmp(cmd, "help") == 0){ help();return 0 ;}
+           else  if(strcmp(cmd, "pause") == 0){ return 3 ;}
+           else {return 1;}
+            }
+
+
+            else {return 1;}
+
+        return 1;
+        }
+
+//*****************************************************************************************************************************************
+//*****************************************************************************************************************************************
+  // Help command
+int help()
+{
+    puts("\n***WELCOME TO CREAM SHELL HELP***"
+        "\n-Use the shell at your own risk..."
+        "\nList of Commands supported:"
+        "\n>cd"
+        "\n>dir"
+        "\n>echo"
+        "\n>envr"
+        "\n>pause"
+        "\n>clr"
+        "\n>help"
+        "\n>exit"
+        "\n>all other general commands available in UNIX shell"
+        "\n>pipe handling"
+        "\n>redirection"
+        "\n>batch file support");
+
+    return 0;
+}
+
 //*****************************************************************************************************************************************
 //function that is equivalent to Linux ls command
 // this prints out the files in the current working directory.
@@ -63,6 +118,7 @@ using namespace std;
                         //change font to red and print std error
                          printf("\u001b[31m");
                          cout << strerror(errno) << endl;
+                          printf("\x1b[0m");
 
         } // end if
 
@@ -105,6 +161,7 @@ int printDir(){
             //change font to red and print std error
             printf("\u001b[31m");
             cout << strerror(errno) << endl;
+            printf("\x1b[0m");
             return 1;
         }// end else
 } // end printDir
@@ -133,6 +190,7 @@ int cd( char *args[])
          //change font to red and print std error
         printf("\u001b[31m");
         cout << strerror(errno) << endl;
+         printf("\x1b[0m");
     }
  return 0;
 }// end cd

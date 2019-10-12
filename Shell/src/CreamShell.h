@@ -25,16 +25,13 @@ using namespace std;
 //***************function declarations**********************************************************************
 //**********************************************************************************************************
 int clear();
-// help()
+int help();
 // pause()
 int dir();
 void envr();
 int cd( char *argv[]);
 int echo(char* args);
-// getUserInput ()
-// welcomeMsg ()
-// HandleInternal()
-// HandleExternal()
+int execArgsRedirect(char * args1In[],char * args2In[]);
 int parseArgs(char* buf) ;
 int printDir();
 int execArgs(char * args[]);
@@ -43,3 +40,4 @@ int checkForRedirect(char* buf);
 int execRedirect();
 //parsePipe()
 int resetColor();
+int intrnFunc(char* cmd ,char * args[]);
