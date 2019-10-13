@@ -63,6 +63,7 @@ int main (int argc, char *argv[])
       char* tmp;    // to hold user input for temp manipulation
       int swh;     //internal command switch variable
 
+
           // first check if user provided batch file
           // if the user provides any arg with the initial execution assume that it is a batch file name
           if (argc >1)
@@ -114,6 +115,8 @@ int main (int argc, char *argv[])
 
            //user input is white
            resetColor();
+
+           //printf("batch file %i\n  execnow %i\n   ispaused %i\n   redirecting %i\n     redirection type %i\n   tmp %i\n    swh %i\n",batchFile,execNow,isPaused,redirecting,redirectionType,tmp,swh );
            // get user input and wait for user to hit enter
            buf = readline("");  isPaused = 0; // unpause after we take input
            // we gotta check if null before duplicating otherwise we segfault
@@ -123,7 +126,7 @@ int main (int argc, char *argv[])
            if(batchFile == 1 && buf == NULL) {break;}
 
 
-            // parse args
+            // parse the entire input line from the user.
             parseArgs(buf);
             // check for null stuff before going to internal commands switch
             if (buf != NULL && args != NULL)
@@ -145,7 +148,7 @@ int main (int argc, char *argv[])
 
                 isPaused = 1;
             } // if we return 3 then we paused
-           else
+            else
            if(redirecting == 0 && piping ==0)      // if we are not redirecting , and we are not piping and its not an internal command
             {   rtrn == execArgs(args);}         // then exec like only one command
             else
@@ -153,6 +156,8 @@ int main (int argc, char *argv[])
             if ((redirecting == 1) &&(swh == 1) && piping ==0)
            {
               cout << " redirecting  "<< endl;
+
+              cout << " redirecting  "<< "arg 1 is " << args[0] << endl << " args2 is " << args2[0]<< endl;
              execArgsRedirect(args,args2);
            }
 
@@ -161,7 +166,7 @@ int main (int argc, char *argv[])
            {
 
 
-            cout << " piping  "<< endl;
+            cout << " piping  "<< "arg 1 is " << args[0] << endl << " args2 is " << args2[0]<< endl;
             execPipe(args, args2);
 
            }
@@ -203,11 +208,11 @@ int main (int argc, char *argv[])
 
                int check =  checkForRedirect(tmp);            // check the input for redirection or pipe symbol symbol
 
-               if (check== 0 || check== 1 ||check== 4 ){                                   // 0 = > so we are redirecting
+               if (check== 0 || check== 1 ||check== 4 ){                                   // 0 = >, 1 = >>, 4 = |
 
                string s (buf);                                   // convert to c++ style string because we can use fancy c++ std namespace to parse
 
-               if (check == 0){
+                if (check == 0){
                 appenRe = s.find(">");                     // index position of redirection symbol in large string
                }else if (check == 1){
                 appenRe = s.find(">>");
@@ -216,13 +221,9 @@ int main (int argc, char *argv[])
                }
 
 
-
-
                 if (check == 1){  secondArg =  s.substr(appenRe + 2);} // + 2 for when >> symbol
                 else{  secondArg =  s.substr(appenRe + 1); }          // second arg is from the redirect symbol to the end of the string
-
-
-               firstArg = s.substr(0, appenRe -1);                  // first arg is from index 0 to where the position of the redirect symbol is
+                firstArg = s.substr(0, appenRe -1);                  // first arg is from index 0 to where the position of the redirect symbol is
 
 
                // debugging
@@ -467,7 +468,7 @@ cout << "file to redirect to " << filename << endl;
 			  {
 
                     {wait(NULL);}
-                //    {wait(NULL);}
+
               }
             }
 
@@ -477,41 +478,59 @@ cout << "file to redirect to " << filename << endl;
 
 } // end RedirectexecArgs
 //*****************************************************************************************************************************************
+// this function will be called to pipe the out put of command 1 in to the input of command 2
+// this takes as input 2 arrays of strings where the first element of each array is the command and each following element
+// are the arguments for that command.
 int execPipe( char* args1[],char * args2[]) {
-            int fds[2];
-            pipe(fds);
-            pid_t pid1, pid2;
+//            int fds[2];
+//
+//            //make pipe and check for error
+//            if (pipe(fds) < 0)
+//            cout << strerror(errno) << endl;
+//
+//            pid_t pid1;  // associated pids to wait
+//            pid_t pid2;
+//            int newstout;
+//            int newstdin;
+//            char * argToo ;
+//            argToo = args2[0];
+//
+//            // debugging
+//            cout <<" cmd1 \n" << args1[0] << " cmd2 \n"<< args2[0] << endl;
+//            cout <<" arg1 \n" << args1[1] << " arg1 \n"<< args2[1] << endl;
+//            cout <<" arg2 \n" << args1[2] << " arg2 \n"<< args2[2] << endl;
+//
+//               // child process #1
+//               if ((pid1 = fork()) == 0) {
+//
+//
+//                //  newstout = open(fds[1], O_WRONLY| O_CREAT, 0666 | O_APPEND, S_IRWXG | S_IRWXO);
+//                dup2(fds[1], 1);
+//                close(fds[0]);
+//                execvp(args1[0], args1);
+//                printf("\u001b[31m");
+//                cout << strerror(errno) << endl;
+//
+//
+//                // child process #2
+//                }else
+//                if ((pid2 = fork())== 0) {
+//
+//                //newstdin = open(fds[0], O_RDONLY| O_CREAT, 0666 | O_APPEND, S_IRWXG | S_IRWXO);
+//                dup2(fds[0], 0);
+//                close(fds[1]);
+//                execvp(args2[0], args2);
+//                printf("\u001b[31m");
+//                cout << strerror(errno) << endl;
+//
+//
+//
+//            } else
+//            {
+//    	     close(fds[1]);
+//             {wait(NULL);}
+//             {wait(NULL);}
 
-            char * argToo ;
-            argToo = args2[0];
-
-            cout <<" arg1 \n" << args1[0] << " arg2 \n"<< argToo << endl;
-           // child process #1
-           if (pid1 = fork() == 0) {
-                dup2(fds[1], 1);
-                close(fds[0]);
-                execvp(args1[0], args1);
-                perror("execvp failed");
-
-                // child process #2
-                } else if ((pid2 = fork()) == 0) {
-                  dup2(fds[0], 0);
-
-                  close(fds[1]);
-                  execvp(args2[0], args2);
-                  perror("execvp failed");
-
-
-
-
-
-
-
-            } else {
-    	close(fds[1]);
-
-    	waitpid(pid1, NULL, 0);
-        waitpid(pid2, NULL, 0);
-}
+//           }
 }// end execPipe
 //*****************************************************************************************************************************************
