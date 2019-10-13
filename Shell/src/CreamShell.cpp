@@ -98,6 +98,7 @@ int main (int argc, char *argv[])
         {
            // asdasd
            redirecting = 0;
+           piping = 0;
            redirectionType = -1;
            execNow = 0;
            swh =1;
@@ -137,30 +138,39 @@ int main (int argc, char *argv[])
             if (swh == 2)  // if we reutn 2 then we chose to exit
             {
                  running =1;
-            }else
-             if (swh == 3){
+            }
+            else
+            if (swh == 3)
+            {
 
                 isPaused = 1;
             } // if we return 3 then we paused
-            else
-
-           if(redirecting == 0 )      // if we are not redirecting , and its not an internal command
-            {   rtrn == execArgs(args);}         // then exec like only one command
            else
-           // if we are redirecting then and not using internal then redirect for external
-            if ((redirecting == 1) &&(swh == 1))
+           if(redirecting == 0 && piping ==0)      // if we are not redirecting , and we are not piping and its not an internal command
+            {   rtrn == execArgs(args);}         // then exec like only one command
+            else
+            // if we are redirecting then and not using internal then redirect for external
+            if ((redirecting == 1) &&(swh == 1) && piping ==0)
+           {
+              cout << " redirecting  "<< endl;
+             execArgsRedirect(args,args2);
+           }
+
+           // if we are piping handle piping exec
+           else if (redirecting == 0 && piping ==1)
            {
 
-             execArgsRedirect(args,args2);
+
+            cout << " piping  "<< endl;
+            execPipe(args, args2);
+
            }
            // if exec worked
            if (rtrn > 0)
 		   {   // check if we waiting
 			  if(execNow == 0)
 			  {
-//
-//                    {wait(NULL);}
-//                    {wait(NULL);}
+
 	          }
 			  else { cout << "exec imiditatly" << endl; }
 		   }
@@ -186,26 +196,38 @@ int main (int argc, char *argv[])
             string secondArg;
             //copy the whole line from the user
             char* tmp  = strdup(buf);
+             int appenRe ;
 
                //this is probably no the best way to parse multiple arguments but its a method i have used before
 
-               int check =  checkForRedirect(tmp);            // check the input for redirection symbol
 
-               if (check== 0){                                   // 0 = > so we are redirecting
+               int check =  checkForRedirect(tmp);            // check the input for redirection or pipe symbol symbol
+
+               if (check== 0 || check== 1 ||check== 4 ){                                   // 0 = > so we are redirecting
 
                string s (buf);                                   // convert to c++ style string because we can use fancy c++ std namespace to parse
 
-               int appenRe = s.find(">");                     // index position of redirection symbol in large string
+               if (check == 0){
+                appenRe = s.find(">");                     // index position of redirection symbol in large string
+               }else if (check == 1){
+                appenRe = s.find(">>");
+               }else if( check == 4){
+                appenRe = s.find("|");
+               }
 
 
-               //  string firstWord = InitData[j].substr(0, InitData[j].find(" "));
+
+
+                if (check == 1){  secondArg =  s.substr(appenRe + 2);} // + 2 for when >> symbol
+                else{  secondArg =  s.substr(appenRe + 1); }          // second arg is from the redirect symbol to the end of the string
+
 
                firstArg = s.substr(0, appenRe -1);                  // first arg is from index 0 to where the position of the redirect symbol is
-               secondArg =  s.substr(appenRe + 1);                   // second arg is from the redirect symbol to the end of the string
+
 
                // debugging
-                 printf("first arg is %s", firstArg.c_str());
-                 printf("second arg is %s", secondArg.c_str());
+                 printf("first arg is %s ", firstArg.c_str());
+                 printf("second arg is %s ", secondArg.c_str());
             }
 
             /*
@@ -323,8 +345,22 @@ cmd = strtok(in," ");
 // we will break apart a copy of the whole line input by the user
  while (cmd != NULL)
             {
+                        if(strcmp (cmd, "|" )== 0){
+                            redirecting = 0;
+                            piping = 1;
+                            returnVal = 4; cout << "| detected" << endl;
+                            return returnVal;
+                        }
+                        else
+                             if(strcmp(cmd, ">>") == 0)
+                        {
+                        returnVal = 1; cout << ">> detected" << endl;
+                        redirecting =1;
+                        redirectionType = 1;
+                        return returnVal;
 
-
+                        }
+                         else
                     if (strcmp(cmd, ">") == 0)
                         {
                         returnVal = 0; cout << "> detected" << endl;
@@ -333,20 +369,13 @@ cmd = strtok(in," ");
                         return returnVal;
 
                         }else
-                    if(strcmp(cmd, ">>") == 0)
-                        {
-                        returnVal = 1; cout << ">> detected" << endl;
-                        redirecting =1;
-                         redirectionType = 1;
-                        return returnVal;
 
-                        }
-                    else
+
                     if(strcmp(cmd, "<") == 0)
                         {
                         returnVal = 2; cout << "< detected" << endl;
                         redirecting =1;
-                         redirectionType = 2;
+                        redirectionType = 2;
                         return returnVal;
 
                         }
@@ -355,7 +384,7 @@ cmd = strtok(in," ");
                         {
                         returnVal = 3; cout << "<< detected" << endl;
                         redirecting =1;
-                         redirectionType = 3;
+                        redirectionType = 3;
                         return returnVal;
 
                         }
@@ -419,8 +448,6 @@ cout << "file to redirect to " << filename << endl;
 
                 }
 
-
-
                         // if what the user entered doesnt makes sense
                         if (execvp(args1In[0], args1In) < 0)
                             {
@@ -432,8 +459,8 @@ cout << "file to redirect to " << filename << endl;
 
                             }
                               //this should never print
-                              printf("I am the Child! %i\n", getpid());
-           }
+                               printf("I am the Child! %i\n", getpid());
+             }
         else {
 
                  if(execNow == 0)
@@ -445,12 +472,46 @@ cout << "file to redirect to " << filename << endl;
             }
 
 
-//                waitpid(pid1, NULL, 0);
-//                waitpid(pid2, NULL, 0);
-//
+
 
 
 } // end RedirectexecArgs
+//*****************************************************************************************************************************************
+int execPipe( char* args1[],char * args2[]) {
+            int fds[2];
+            pipe(fds);
+            pid_t pid1, pid2;
+
+            char * argToo ;
+            argToo = args2[0];
+
+            cout <<" arg1 \n" << args1[0] << " arg2 \n"<< argToo << endl;
+           // child process #1
+           if (pid1 = fork() == 0) {
+                dup2(fds[1], 1);
+                close(fds[0]);
+                execvp(args1[0], args1);
+                perror("execvp failed");
+
+                // child process #2
+                } else if ((pid2 = fork()) == 0) {
+                  dup2(fds[0], 0);
+
+                  close(fds[1]);
+                  execvp(args2[0], args2);
+                  perror("execvp failed");
 
 
 
+
+
+
+
+            } else {
+    	close(fds[1]);
+
+    	waitpid(pid1, NULL, 0);
+        waitpid(pid2, NULL, 0);
+}
+}// end execPipe
+//*****************************************************************************************************************************************

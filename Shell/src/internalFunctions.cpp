@@ -49,6 +49,8 @@ using namespace std;
 
 
 //*****************************************************************************************************************************************
+// this is the function to select select internal functions given the user input
+//
    int intrnFunc(char* cmd,char  * args[] )
         {
 
@@ -57,7 +59,7 @@ using namespace std;
            if(strcmp(cmd, "echo") == 0){ echo(cmd); return 0;}else
 
            if(strcmp(cmd, "exit") == 0){   printf("\ngoodbye \n"); return 2 ;}
-           else                                     // if user entered clr then clear screen. this will be moved the handleInternal() function
+           else
            if(strcmp(cmd, "clr") == 0){  clear();return 0;}
            else
            if(strcmp(args[0], "cd") == 0){  cd(args);return 0;}
@@ -83,20 +85,22 @@ using namespace std;
 int help()
 {
     printf("\n***WELCOME TO CREAM SHELL HELP***"
+        "\n>*******************************"
         "\n-Use the shell at your own risk..."
         "\nList of Commands supported:"
-        "\n>cd"
-        "\n>dir"
-        "\n>echo"
-        "\n>envr"
-        "\n>pause"
-        "\n>clr"
-        "\n>help"
-        "\n>exit"
-        "\n>all other general commands available in UNIX shell"
+        "\n>cd -[directory name to move to]"
+        "\n>dir   // prints out files in current directory"
+        "\n>echo -[args] // prints to screen whatever is given as input"
+        "\n>envr  //prints environment variables"
+        "\n>pause // pauses until user hits enter"
+        "\n>clr   // clear terminal"
+        "\n>help  // displays help"
+        "\n>exit  // exits"
+        "\n>*******************************"
         "\n>pipe handling"
         "\n>redirection"
-        "\n>batch file support \n");
+        "\n>batch file support \n"
+        "\n>all other general commands available in UNIX shell\n");
 
     return 0;
 }

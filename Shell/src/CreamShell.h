@@ -26,7 +26,6 @@ using namespace std;
 //**********************************************************************************************************
 int clear();
 int help();
-// pause()
 int dir();
 void envr();
 int cd( char *argv[]);
@@ -35,9 +34,8 @@ int execArgsRedirect(char * args1In[],char * args2In[]);
 int parseArgs(char* buf) ;
 int printDir();
 int execArgs(char * args[]);
-//handle &
 int checkForRedirect(char* buf);
-int execRedirect();
-//parsePipe()
+int execPipe(char * args1In[],char * args2In[]);
+int checkForPipe(char * buf);
 int resetColor();
 int intrnFunc(char* cmd ,char * args[]);
