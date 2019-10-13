@@ -4,7 +4,7 @@ pause
 help
 cat makefile
 echo lines in main program
-wc -l CreamShell.cpp
+wc -l CreamShell.cpp &
 envr
 cd ..
 cat README.md > testfile.txt
