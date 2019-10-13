@@ -1,6 +1,7 @@
 echo testing echo
 dir
 pause
+this is not a command
 help
 cat makefile
 echo lines in main program

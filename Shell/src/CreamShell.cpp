@@ -155,9 +155,9 @@ int main (int argc, char *argv[])
             // if we are redirecting then and not using internal then redirect for external
             if ((redirecting == 1) &&(swh == 1) && piping ==0)
            {
-              cout << " redirecting  "<< endl;
+              //cout << " redirecting  "<< endl;
 
-              cout << " redirecting  "<< "arg 1 is " << args[0] << endl << " args2 is " << args2[0]<< endl;
+            //  cout << " redirecting  "<< "arg 1 is " << args[0] << endl << " args2 is " << args2[0]<< endl;
              execArgsRedirect(args,args2);
            }
 
@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
            {
 
 
-            cout << " piping  "<< "arg 1 is " << args[0] << endl << " args2 is " << args2[0]<< endl;
+           // cout << " piping  "<< "arg 1 is " << args[0] << endl << " args2 is " << args2[0]<< endl;
             execPipe(args, args2);
 
            }
@@ -227,8 +227,8 @@ int main (int argc, char *argv[])
 
 
                // debugging
-                 printf("first arg is %s ", firstArg.c_str());
-                 printf("second arg is %s ", secondArg.c_str());
+//                 printf("first arg is %s ", firstArg.c_str());
+//                 printf("second arg is %s ", secondArg.c_str());
             }
 
             /*
@@ -349,13 +349,13 @@ cmd = strtok(in," ");
                         if(strcmp (cmd, "|" )== 0){
                             redirecting = 0;
                             piping = 1;
-                            returnVal = 4; cout << "| detected" << endl;
+                            returnVal = 4;// cout << "| detected" << endl;
                             return returnVal;
                         }
                         else
                              if(strcmp(cmd, ">>") == 0)
                         {
-                        returnVal = 1; cout << ">> detected" << endl;
+                        returnVal = 1;// cout << ">> detected" << endl;
                         redirecting =1;
                         redirectionType = 1;
                         return returnVal;
@@ -364,7 +364,7 @@ cmd = strtok(in," ");
                          else
                     if (strcmp(cmd, ">") == 0)
                         {
-                        returnVal = 0; cout << "> detected" << endl;
+                       returnVal = 0; //cout << "> detected" << endl;
                         redirecting =1;
                         redirectionType = 0;
                         return returnVal;
@@ -374,7 +374,7 @@ cmd = strtok(in," ");
 
                     if(strcmp(cmd, "<") == 0)
                         {
-                        returnVal = 2; cout << "< detected" << endl;
+                        returnVal = 2;// cout << "< detected" << endl;
                         redirecting =1;
                         redirectionType = 2;
                         return returnVal;
@@ -383,7 +383,7 @@ cmd = strtok(in," ");
                         else
                     if(strcmp(cmd, ">>") == 0)
                         {
-                        returnVal = 3; cout << "<< detected" << endl;
+                        returnVal = 3;  // cout << "<< detected" << endl;
                         redirecting =1;
                         redirectionType = 3;
                         return returnVal;
@@ -420,7 +420,7 @@ pid_t pid2;
 //filename to redirect too is first arg of second cmd string
 
 file = args2In[0];
-cout << "file to redirect to " << filename << endl;
+//cout << "file to redirect to " << filename << endl;
 
  //first child for first command
  if ((pid1 = fork()) == 0)
@@ -431,10 +431,16 @@ cout << "file to redirect to " << filename << endl;
 
 
                       // check for > or >> to append or truncate file for redirection
-              if ( redirectionType == 0)
-              newstout = open(file, O_WRONLY| O_CREAT, 0666 | O_APPEND, S_IRWXG | S_IRWXO);
-              if ( redirectionType == 1)
-              newstout = open(file, O_WRONLY| O_CREAT, 0666 | O_TRUNC, S_IRWXG | S_IRWXO);
+              if ( redirectionType == 0){
+                newstout = open(file, O_WRONLY| O_CREAT, 0644 | O_APPEND, S_IRWXG | S_IRWXO);
+              }
+              else
+              if ( redirectionType == 1){
+                newstout = open(file, O_WRONLY| O_CREAT, 0644 | O_TRUNC, S_IRWXG | S_IRWXO);
+              }
+
+
+
 
                 //returns a -1 if an error occurred
                if (newstout < 0) {
