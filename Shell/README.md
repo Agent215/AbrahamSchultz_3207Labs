@@ -25,6 +25,7 @@ echo hello world
       - pipe handling                      // use the "|" symbol for piping
       - redirection                        // > for append to file>> for truncate file,  same for < and << symbols
       - batch file support                 // type ./creamShell followed by the batch file name
+      - prints colors!
       
       - all other general commands available in UNIX shell
 
