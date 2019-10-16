@@ -1,0 +1,11 @@
+out.txt
+t
+creamShell
+CreamShell.cpp
+CreamShell.h
+e.txt
+hello.txt
+internalFunctions.cpp
+makefile
+new.txt
+out.txt
