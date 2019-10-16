@@ -5,4 +5,7 @@ An introduction to operating systems
 
 ## Lab 1
 - Discrete event simulation project
+## Lab 2
 - Command line interpreter
+## Lab 3
+- Networked spell checker
