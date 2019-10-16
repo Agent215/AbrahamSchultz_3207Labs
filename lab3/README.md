@@ -20,7 +20,10 @@
  
  ### Files included: 
  - uml-diagram.pdf     // design document
- - Init.cpp           // read in dictionary
- - dictionary.txt    // list of correctly spelled words
+ - netSpell.h          // header file for program
+ - netSpell.cpp        // this contains the main while loop
+ - Init.cpp            // read in dictionary
+ - dictionary.txt      // list of correctly spelled words
+ 
 
  
