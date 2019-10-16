@@ -20,5 +20,7 @@
  
  ### Files included: 
  - uml-diagram.pdf     // design document
+ - Init.cpp           // read in dictionary
+ - dictionary.txt    // list of correctly spelled words
 
  
