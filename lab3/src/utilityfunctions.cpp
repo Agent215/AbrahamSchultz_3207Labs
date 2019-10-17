@@ -18,6 +18,11 @@ networked spell checker program
 #include <iostream>
 #include "netSpell.h"
 
+
+using namespace std;
+
+
+
 //*****************************************************************************************************
 // this will be the function to check a given string against the given library
 //return 1 if correct 0 if incorrect
@@ -47,7 +52,7 @@ return correct;
 
 /*
 this function is copied from page 906 of "Computer Systems a programers perspective"
-this is a helper function which opens a returns a listening socket.
+this is a helper function which opens a returns and listening socket.
 */
 int open_listenfd(int port)
 
@@ -70,12 +75,13 @@ int open_listenfd(int port)
   serveraddr.sin_family = AF_INET;
   serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
   serveraddr.sin_port = htons((unsigned short)port);
-  if (bind(listenfd, (SA *)&serveraddr, sizeof(serveraddr)) < 0)
+  if (bind(listenfd, (struct sockaddr* )&serveraddr, sizeof(serveraddr)) < 0)
 	return -1;
 
  /* Make it a listening socket ready to accept connection requests */
-if (listen(listenfd, LISTENQ) < 0)
+ // hardcoded 20 as max backlog for now
+if (listen(listenfd, 20) < 0)
 	return -1;
 return listenfd;
-
+return 0;
 }

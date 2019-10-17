@@ -61,28 +61,6 @@ return diction;
 
 //***************************************************************************************************************
 
-// this will be the function to check a given string against the given library
-//return 1 if correct 0 if incorrect
-int checkSpell(string input, string dict[]){
 
-                 int correct = 0;                                               // is 1 if correct
-
-                  for (int i = 0; i < FILESIZE; i++)                            // check against dictionary array
-                            {
-
-                                 if (strcmp(input.c_str(),dict[i].c_str())==0)
-                                     {                                            //compare against each word in array
-                                        cout << "OK " <<  input.c_str() <<endl;
-                                        correct =1;
-                                        break;
-                                     } // end if
-
-                            } // end for
-                                if (correct == 0)
-                               cout << " MISSPELLED " << input.c_str() <<endl;
-
-
-return correct;
-} // end checkSpell
 
 
