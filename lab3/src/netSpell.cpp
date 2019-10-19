@@ -13,71 +13,116 @@ which is the third lab as part of temple university 3207 OS class
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <string.h>
 #include <cstring>
 #include <fstream>
 #include <errno.h>
 #include <iostream>
+#include <pthread.h>
+#include <sys/types.h>
+#include <time.h>
+
 #include "netSpell.h"
 
-const int PORT = 8888;
+const int PORT = 8018;
 extern int errno;      // errno for use with std error
+queue logQueue;        // queue  to hold buffer for access to which workers threads can write to log file
+queue clinetQueue;     // queue to keep track of clients.
+
+
 // main function for program
 int main (){
 string* diction = new string [99171];
 
-int connectPort = PORT;
-struct sockaddr_in client;
-socklen_t clientLen = sizeof(client);
-int connectSocket, clientSocket;
-
 //load dictionary
 diction = loadDiction();
 
-connectSocket = open_listenfd(connectPort);
- if(connectSocket == -1){
-      cout << strerror(errno) << endl;
-   }// end if
+
+int connectPort = PORT;
 
 
 
 
-    while(1) {
-        if((clientSocket = accept(connectSocket, (struct sockaddr*)&client, &clientLen)) == -1){
-            printf("Error connecting to client.\n");
-            return -1;
+    int socket_desc, new_socket, c;
+    struct sockaddr_in sin;
+    struct sockaddr_in server, client;
+    char *message;
+
+    //create socket(create active socket descriptor)
+    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    if(socket_desc == -1) //if an error occurred when creating the socket
+    {
+        puts("Error creating socket!");
+    }
+    //prepare the sockaddr_instructure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(PORT);
+    //Bind (connect the server's socket addressto the socket descriptor);print a message and exit the program if an error occurred
+    if(bind(socket_desc, (struct sockaddr*)&server, sizeof(server)) <0)
+    {
+        puts("Error: Bind Failed");
+        return 1;
+    }
+    puts("Bind done.");
+    //listen (converts the active socket to a LISTENING socket; can accept connections)
+    listen(socket_desc, 3);
+    //Print a message saying that the server is waiting for incoming connections
+    cout << "Waiting for incoming connections at port number " << PORT << "..." << endl;
+    //while loop that continues to wait for incoming connections
+    while(1)
+    {
+        //Accept an incoming connection; create a new CONNECTED descriptor
+        c = sizeof(struct sockaddr_in);
+        new_socket = accept(socket_desc, (struct sockaddr*)&client, (socklen_t*)&c);
+        if(new_socket < 0)
+        {
+            perror("Error: Accept Failed");
+            return 1;
         }
+        puts("Connection accepted.");
 
 
-        char *success_msg = "connection to server successful!\n";
-        send(clientSocket, success_msg, strlen(success_msg), 0);
-        char *wait_msg = "please wait...\n";
-        send(clientSocket, wait_msg, strlen(wait_msg), 0);
+                    string buf;                                                //create a string buf to hold user input
+                    cout << "hello please enter a word to check" << endl;      // get user input from console
+                    getline( cin, buf);
+
+                      if  (strcmp(buf.c_str(),"exit")==0)                       // check to exit
+                              {
+                                return 0;
+                                break;
+                              } // end if
+
+                              checkSpell(buf,diction );                          // call checkSpell function
+
+    }
 
 
 
-    } // end while
+////
+////                 // loop for testing string matching
+////                 while (1){
+////
+////                       string buf;                                                //create a string buf to hold user input
+////                       cout << "hello please enter a word to check" << endl;      // get user input from console
+////                       getline( cin, buf);
+////
+////                        if  (strcmp(buf.c_str(),"exit")==0)                       // check to exit
+////                              {
+////                                return 0;
+////                                break;
+////                              } // end if
+////
+////                              checkSpell(buf,diction );                          // call checkSpell function
+////
+////                  } // end while
 //
-//                 // loop for testing string matching
-//                 while (1){
 //
-//                       string buf;                                                //create a string buf to hold user input
-//                       cout << "hello please enter a word to check" << endl;      // get user input from console
-//                       getline( cin, buf);
 //
-//                        if  (strcmp(buf.c_str(),"exit")==0)                       // check to exit
-//                              {
-//                                return 0;
-//                                break;
-//                              } // end if
-//
-//                              checkSpell(buf,diction );                          // call checkSpell function
-//
-//                  } // end while
-
-
-
 
 
 } // end main
