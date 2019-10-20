@@ -21,6 +21,7 @@ The program should Implement a networked spell checker server.
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46,4 +47,6 @@ Declare functions
 int checkSpell(string input, string dict[]);
 string * loadDiction();
 int open_listenfd(int port);
+void serviceClient(int &client, string dict[]);
+void* work(queue<int> client, string dict[]);
 #endif

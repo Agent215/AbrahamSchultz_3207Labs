@@ -25,13 +25,21 @@ which is the third lab as part of temple university 3207 OS class
 #include <pthread.h>
 #include <sys/types.h>
 #include <time.h>
-
+#include <queue>
+#include <algorithm>
 #include "netSpell.h"
 
-const int PORT = 8018;
+const int PORT = 8888;
 extern int errno;      // errno for use with std error
-queue logQueue;        // queue  to hold buffer for access to which workers threads can write to log file
-queue clinetQueue;     // queue to keep track of clients.
+queue<string> logQueue;        // queue  to hold buffer for access to which workers threads can write to log file
+queue<int> clientQueue;     // queue to keep track of clients.
+
+// thread pool 
+pthread_t worker1;
+pthread_t worker2;
+pthread_t worker3;
+pthread_t logger;
+
 
 
 // main function for program
@@ -87,42 +95,21 @@ int connectPort = PORT;
         puts("Connection accepted.");
 
 
-                    string buf;                                                //create a string buf to hold user input
-                    cout << "hello please enter a word to check" << endl;      // get user input from console
-                    getline( cin, buf);
+        char buf[1024];
+        for (int i = 0; i < sizeof(buf); i++)
+        buf[i] = '\0';  
+	
+	// add cleint to queue 
+       clientQueue.push(new_socket);
+		while (1) {
 
-                      if  (strcmp(buf.c_str(),"exit")==0)                       // check to exit
-                              {
-                                return 0;
-                                break;
-                              } // end if
-
-                              checkSpell(buf,diction );                          // call checkSpell function
-
-    }
+                    
+  		 serviceClient(new_socket, diction);
+   			 } // end while
 
 
-
-////
-////                 // loop for testing string matching
-////                 while (1){
-////
-////                       string buf;                                                //create a string buf to hold user input
-////                       cout << "hello please enter a word to check" << endl;      // get user input from console
-////                       getline( cin, buf);
-////
-////                        if  (strcmp(buf.c_str(),"exit")==0)                       // check to exit
-////                              {
-////                                return 0;
-////                                break;
-////                              } // end if
-////
-////                              checkSpell(buf,diction );                          // call checkSpell function
-////
-////                  } // end while
-//
-//
-//
+} // end while
 
 
 } // end main
+

@@ -14,8 +14,10 @@ networked spell checker program
 #include <errno.h>
 #include <string.h>
 #include <cstring>
+#include <queue>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include "netSpell.h"
 
 
@@ -24,8 +26,10 @@ using namespace std;
 
 
 //*****************************************************************************************************
-// this will be the function to check a given string against the given library
-//return 1 if correct 0 if incorrect
+/*
+ this will be the function to check a given string against the given library
+ return 1 if correct 0 if incorrect
+*/
 int checkSpell(string input, string dict[]){
 
                  int correct = 0;                                               // is 1 if correct
@@ -42,13 +46,79 @@ int checkSpell(string input, string dict[]){
 
                             } // end for
                                 if (correct == 0)
-                               cout << " MISSPELLED " << input.c_str() <<endl;
+                               cout << "MISSPELLED " << input.c_str() <<endl;
 
 
 return correct;
 } // end checkSpell
 
 //*****************************************************************************************************
+
+/*
+ this function will perform the service of spell checking and recieving and sending data to client
+*/
+
+void serviceClient(int &client, string dict[]){
+
+
+                    char buf[1024];
+                    for (int i = 0; i < sizeof(buf); i++)
+                    buf[i] = '\0';
+
+
+                    int tmp;
+                    //string buf;                                                 //create a string buf to hold user input
+                    string tmpMsg;
+                    cout << "waiting for word" << endl;                           // server is watiting for input
+                    tmp = read(client, buf, 1024);
+                    int len = buf[strlen(buf)+1];
+                    buf[strlen(buf)+1] = '\0';
+                    string s = buf;
+                    s.erase(s.length()-2);
+                    s.erase(remove(s.begin(), s.end(), '\n'), s.end());
+                    //print message in server
+                    cout <<"Recieved " << buf << endl;
+                    //check to see if it is in the buffer
+
+                    tmpMsg += "hello please enter a word to check\n";
+                    tmp = write(client, tmpMsg.c_str(), tmpMsg.size());
+
+                              checkSpell(s,dict );                          // call checkSpell function
+
+
+                                 for (int i = 0; i < sizeof(buf); i++)   // clear buf
+                                 buf[i] = '\0';
+
+
+
+} // end serviceClient
+
+
+
+/******************************************************************************************************************************
+*/
+//this the worker thhreads function
+void *work(queue<int> clients, string dict[]){
+    int new_socket;
+    while(1){
+        //lock mutex
+       
+        //check to see if buffer is empty
+        while(clients.empty())
+                {
+                
+                }if(!clients.empty()){
+            new_socket = clients.front();
+            clients.pop();
+        }
+        // pthread_mutex_unlock(&bufEdit);
+        // pthread_cond_signal(&notFull);
+         //Read from client and write to log file in read
+         serviceClient(new_socket,dict);
+    }
+}
+
+
 
 /*
 this function is copied from page 906 of "Computer Systems a programers perspective"
