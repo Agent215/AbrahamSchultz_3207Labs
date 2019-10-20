@@ -25,8 +25,8 @@ using namespace std;
 
 
 
-//*****************************************************************************************************
 /*
+****************************************************************************************************
  this will be the function to check a given string against the given library
  return 1 if correct 0 if incorrect
 */
@@ -52,98 +52,84 @@ int checkSpell(string input, string dict[]){
 return correct;
 } // end checkSpell
 
-//*****************************************************************************************************
 
 /*
- this function will perform the service of spell checking and recieving and sending data to client
+*****************************************************************************************************
+ this function will perform the service of spell checking and receiving and sending data to client
 */
 
 void serviceClient(int &client, string dict[]){
 
 
-                    char buf[1024];
+    while (1) {
+                    char buf[1024];                             // holds user input
                     for (int i = 0; i < sizeof(buf); i++)
-                    buf[i] = '\0';
+                    buf[i] = '\0';                              // make sure buf is empty by clearing it out
 
 
-                    int tmp;
-                    //string buf;                                                 //create a string buf to hold user input
                     string tmpMsg;
-                    cout << "waiting for word" << endl;                           // server is watiting for input
-                    tmp = read(client, buf, 1024);
-                    int len = buf[strlen(buf)+1];
+                    tmpMsg += "please enter a word to check\n";                   //prompt message
+                    write(client, tmpMsg.c_str(), tmpMsg.size());
+                   // cout << "waiting for word" << endl;                           // server is watiting for input
+                    read(client, buf, 1024);
                     buf[strlen(buf)+1] = '\0';
                     string s = buf;
                     s.erase(s.length()-2);
                     s.erase(remove(s.begin(), s.end(), '\n'), s.end());
-                    //print message in server
+
+                    //debugging
                     cout <<"Recieved " << buf << endl;
-                    //check to see if it is in the buffer
 
-                    tmpMsg += "hello please enter a word to check\n";
-                    tmp = write(client, tmpMsg.c_str(), tmpMsg.size());
-
-                              checkSpell(s,dict );                          // call checkSpell function
+                    int correct = checkSpell(s,dict );     // call checkSpell function, 1 if correct
 
 
-                                 for (int i = 0; i < sizeof(buf); i++)   // clear buf
-                                 buf[i] = '\0';
+                      if (correct == 1) {   // if correct then tell client
 
+                          tmpMsg = "OK ";                   //OK message
+                          tmpMsg += s;
+                          tmpMsg += "\n";
+                          write(client, tmpMsg.c_str(), tmpMsg.size());
 
+                                       } // end if
+                      else{
+
+                          tmpMsg = "MISSPELLED ";                  // if misspelled send to client
+                          tmpMsg += s;
+                          tmpMsg += "\n";
+                          write(client, tmpMsg.c_str(), tmpMsg.size());
+                           } // end else
+
+                        for (int i = 0; i < sizeof(buf); i++)    // clear buf
+                          buf[i] = '\0';
+
+    }
 
 } // end serviceClient
 
 
 
-/******************************************************************************************************************************
-*/
-//this the worker thhreads function
-void *work(queue<int> clients, string dict[]){
-    int new_socket;
-    while(1){
-        //lock mutex
-       
-        //check to see if buffer is empty
-        while(clients.empty())
-                {
-                
-                }if(!clients.empty()){
-            new_socket = clients.front();
-            clients.pop();
-        }
-        // pthread_mutex_unlock(&bufEdit);
-        // pthread_cond_signal(&notFull);
-         //Read from client and write to log file in read
-         serviceClient(new_socket,dict);
-    }
-}
-
-
-
 /*
+*****************************************************************************************************************************
 this function is copied from page 906 of "Computer Systems a programers perspective"
-this is a helper function which opens a returns and listening socket.
+this is a helper function which opens binds and returns and listening socket.
 */
 int open_listenfd(int port) {
-	int listenfd, optval=1;
-	struct sockaddr_in serveraddr;
+	int listenfd, optval=1;         // file descriptors
+	struct sockaddr_in serveraddr;  // struct for server address
 
-	/* Create a socket descriptor */
+
+
 	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		return -1;
 	}
 
-	 /* Eliminates "Address already in use" error from bind */
+
 	 if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR,
 	 (const void *)&optval , sizeof(int)) < 0){
 	 	return -1;
 	 }
 
-	 //Reset the serveraddr struct, setting all of it's bytes to zero.
-	 //Some properties are then set for the struct, you don't
-	 //need to worry about these.
-	 //bind() is then called, associating the port number with the
-	 //socket descriptor.
+
 	 bzero((char *) &serveraddr, sizeof(serveraddr));
 	 serveraddr.sin_family = AF_INET;
 	 serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -152,9 +138,7 @@ int open_listenfd(int port) {
 	 	return -1;
 	 }
 
-	 //Prepare the socket to allow accept() calls. The value 20 is
-	 //the backlog, this is the maximum number of connections that will be placed
-	 //on queue until accept() is called again.
+
 	 if (listen(listenfd, 20) < 0){
 	 	return -1;
 	 }

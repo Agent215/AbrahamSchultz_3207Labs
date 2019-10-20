@@ -7,6 +7,18 @@ last edited 10/16/2019
 This is the main file for the networked spell checker program
 which is the third lab as part of temple university 3207 OS class
 
+
+
+this file contains the main function which has the main while loop.
+within the loop we continually check for incoming connection requests and then add them
+to the clientQueue.  we also create a pool of worker threads which continually look to see if the
+clientQueue is empty.
+There are two critical sections in this code where race condition can occur.
+1. the clientQueue 2. the logQueue
+The workers also check a lock to see if any other workers are editing the queues.
+then if all is clear, and  if it is not empty then the worker executes the service routine
+which in this case checks the word against a dictionary file.
+
 */
 
 
@@ -29,62 +41,51 @@ which is the third lab as part of temple university 3207 OS class
 #include <algorithm>
 #include "netSpell.h"
 
-const int PORT = 8888;
-extern int errno;      // errno for use with std error
+const int PORT = 8000;
+extern int errno;              // errno for use with std error
 queue<string> logQueue;        // queue  to hold buffer for access to which workers threads can write to log file
-queue<int> clientQueue;     // queue to keep track of clients.
+queue<int> clientQueue;        // queue to keep track of clients.
 
-// thread pool 
+
+pthread_mutex_t socketEdit;        // lock for editing clientQueue
+pthread_cond_t hasClient;          // condition if we have clients in queue
+pthread_cond_t hasSpace;           // if we are not full
+
+// thread pool
 pthread_t worker1;
 pthread_t worker2;
 pthread_t worker3;
 pthread_t logger;
 
+string* gdiction = new string [99171];
 
 
 // main function for program
 int main (){
-string* diction = new string [99171];
 
+
+// create worker thread pool
+pthread_create(&worker1, NULL, work, NULL);
+pthread_create(&worker2, NULL, work, NULL);
+pthread_create(&worker3, NULL, work, NULL);
+
+pthread_mutex_unlock(&socketEdit);
+pthread_cond_signal(&hasSpace);
 //load dictionary
-diction = loadDiction();
+gdiction = loadDiction();
 
 
-int connectPort = PORT;
+    int socket_desc, new_socket, c;     //socket file descriptors
+    struct sockaddr_in  client;
 
-
-
-
-    int socket_desc, new_socket, c;
-    struct sockaddr_in sin;
-    struct sockaddr_in server, client;
-    char *message;
-
-    //create socket(create active socket descriptor)
-    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-    if(socket_desc == -1) //if an error occurred when creating the socket
-    {
-        puts("Error creating socket!");
-    }
-    //prepare the sockaddr_instructure
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(PORT);
-    //Bind (connect the server's socket addressto the socket descriptor);print a message and exit the program if an error occurred
-    if(bind(socket_desc, (struct sockaddr*)&server, sizeof(server)) <0)
-    {
-        puts("Error: Bind Failed");
-        return 1;
-    }
-    puts("Bind done.");
-    //listen (converts the active socket to a LISTENING socket; can accept connections)
-    listen(socket_desc, 3);
-    //Print a message saying that the server is waiting for incoming connections
+    // here we call the function to open and assign incoming port
+     socket_desc = open_listenfd(PORT);
+    // log to console
     cout << "Waiting for incoming connections at port number " << PORT << "..." << endl;
     //while loop that continues to wait for incoming connections
     while(1)
     {
-        //Accept an incoming connection; create a new CONNECTED descriptor
+        //Accept an incoming connection,  make a new file descriptor for new client socket
         c = sizeof(struct sockaddr_in);
         new_socket = accept(socket_desc, (struct sockaddr*)&client, (socklen_t*)&c);
         if(new_socket < 0)
@@ -95,21 +96,45 @@ int connectPort = PORT;
         puts("Connection accepted.");
 
 
-        char buf[1024];
-        for (int i = 0; i < sizeof(buf); i++)
-        buf[i] = '\0';  
-	
-	// add cleint to queue 
-       clientQueue.push(new_socket);
-		while (1) {
-
-                    
-  		 serviceClient(new_socket, diction);
-   			 } // end while
+	       // add cleint to queue
+          clientQueue.push(new_socket);
+          pthread_cond_signal(&hasSpace);
 
 
-} // end while
+    } // end while
 
 
 } // end main
+
+/*
+************************************************************************************************************
+*/
+
+//this the worker threads function
+// there is a critical section in this code pertaining to workers accessing the
+// client queue we will use mutex and lock to prevent race conditions here.
+void *work(void *varg){
+    int new_socket;
+    while(1){
+        //lock mutex
+        pthread_mutex_lock(&socketEdit);
+        //check to see if buffer is empty
+        while(clientQueue.empty())
+                {
+                    // if we are empty then set condition we have space and we are not editing queue
+                    pthread_cond_wait(&hasSpace, &socketEdit);
+                }if(!clientQueue.empty()){
+
+                        new_socket = clientQueue.front();
+                        clientQueue.pop();
+
+               }
+               // unlock
+               pthread_mutex_unlock(&socketEdit);
+
+          pthread_cond_signal(&hasClient);
+          //Read from client and check words, also will write to log
+         serviceClient(new_socket,gdiction);
+         }
+} // end work
 

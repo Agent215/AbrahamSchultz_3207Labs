@@ -48,5 +48,5 @@ int checkSpell(string input, string dict[]);
 string * loadDiction();
 int open_listenfd(int port);
 void serviceClient(int &client, string dict[]);
-void* work(queue<int> client, string dict[]);
+void* work(void *varg);
 #endif

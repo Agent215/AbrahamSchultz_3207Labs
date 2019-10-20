@@ -1,3 +1,10 @@
+/*
+testServer.cpp
+Abraham Schultz
+
+taken from class slides
+
+*/
 #include<stdio.h>
 #include<string.h>  //inet_addrint
 #include<sys/socket.h>
