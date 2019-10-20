@@ -58,27 +58,27 @@ return correct;
  this function will perform the service of spell checking and receiving and sending data to client
 */
 
-void serviceClient(int &client, string dict[]){
+void serviceClient(int &client, string dict[],queue<string> &logqueue){
 
 
     while (1) {
-                    char buf[1024];                             // holds user input
+                    char buf[1024];                             // to holds user input
                     for (int i = 0; i < sizeof(buf); i++)
                     buf[i] = '\0';                              // make sure buf is empty by clearing it out
 
 
-                    string tmpMsg;
-                    tmpMsg += "please enter a word to check\n";                   //prompt message
+                    string tmpMsg;                                                   //tmp string to hold message for user at any given time
+                    tmpMsg += "enter a word to check\n";                             //prompt message
                     write(client, tmpMsg.c_str(), tmpMsg.size());
-                   // cout << "waiting for word" << endl;                           // server is watiting for input
-                    read(client, buf, 1024);
-                    buf[strlen(buf)+1] = '\0';
-                    string s = buf;
-                    s.erase(s.length()-2);
-                    s.erase(remove(s.begin(), s.end(), '\n'), s.end());
+                    // cout << "waiting for word" << endl;                           // server is waiting for input
+                    read(client, buf, 1024);                                         // receive input from client
+                    buf[strlen(buf)+1] = '\0';                                       // add terminating char to end of string
+                    string s = buf;                                                  //convert to c++ style string
+                    s.erase(s.length()-2);                                           //erase last two characters
+                    s.erase(remove(s.begin(), s.end(), '\n'), s.end());              // erase any nextline escape sequence chars in string
 
                     //debugging
-                    cout <<"Recieved " << buf << endl;
+                    cout <<"Received " << buf << endl;
 
                     int correct = checkSpell(s,dict );     // call checkSpell function, 1 if correct
 
@@ -98,6 +98,9 @@ void serviceClient(int &client, string dict[]){
                           tmpMsg += "\n";
                           write(client, tmpMsg.c_str(), tmpMsg.size());
                            } // end else
+
+                            // add log data to log queue
+                            logqueue.push(tmpMsg);
 
                         for (int i = 0; i < sizeof(buf); i++)    // clear buf
                           buf[i] = '\0';
