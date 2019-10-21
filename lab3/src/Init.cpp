@@ -23,7 +23,7 @@ for now it just a test script.
 
 using namespace std;
 
-const char *DICTIONARY  = "dictionary.txt";
+// char *DICTIONARY  = "dictionary.txt";
 string* diction = new string [99171];
 /*
   here i am testing a design for reading in a file to an array data structure
@@ -31,12 +31,12 @@ string* diction = new string [99171];
   i am reusing some code from my first lab. this is from the config file.
 */
 //***************************************************************************************************************
-string* loadDiction(){
+string* loadDiction(char *DICT){
 
 
   int counter = 0;
   string line;                                 // read file one line at a time
-  ifstream myfile (DICTIONARY);                //grab file
+  ifstream myfile (DICT);                //grab file
   if (myfile.is_open())
    {
               // split each line

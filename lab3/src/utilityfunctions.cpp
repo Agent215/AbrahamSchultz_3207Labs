@@ -58,7 +58,7 @@ return correct;
  this function will perform the service of spell checking and receiving and sending data to client
 */
 
-void serviceClient(int &client, string dict[],queue<string> &logqueue){
+int serviceClient(int &client, string dict[],queue<string> &logqueue){
 
 
     while (1) {
@@ -83,6 +83,9 @@ void serviceClient(int &client, string dict[],queue<string> &logqueue){
                     int correct = checkSpell(s,dict );     // call checkSpell function, 1 if correct
 
 
+
+			// if the user types exit then exit loop. this frees up the worker thread to accpet new clients
+                     if (strcmp(s.c_str(), "exit")==0){ cout << "a client exited program" << endl; break;}
                       if (correct == 1) {   // if correct then tell client
 
                           tmpMsg = "OK ";                   //OK message
@@ -106,7 +109,7 @@ void serviceClient(int &client, string dict[],queue<string> &logqueue){
                           buf[i] = '\0';
 
     }
-
+return 0;
 } // end serviceClient
 
 

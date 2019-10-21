@@ -40,9 +40,10 @@ const int FILESIZE = 99171;   // used word count program to count lines of dicti
 Declare functions
 */
 int checkSpell(string input, string dict[]);
-string * loadDiction();
+string * loadDiction(char *DICT);
 int open_listenfd(int port);
-void serviceClient(int &client, string dict[],queue<string> &logqueue);
+int serviceClient(int &client, string dict[],queue<string> &logqueue);
 void* work(void *varg);
 void *log  (void *varg);
+int printQueue(queue<int> clientQueue);
 #endif

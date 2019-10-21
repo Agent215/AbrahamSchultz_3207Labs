@@ -41,20 +41,26 @@ which in this case checks the word against a dictionary file.
 #include <algorithm>
 #include "netSpell.h"
 
-const int PORT = 8000;
+
+using namespace std;
+
+int PORT = 8000;
+char *DICTIONARY;
 extern int errno;              // errno for use with std error
 queue<string> logQueue;        // queue  to hold buffer for access to which workers threads can write to log file
 queue<int> clientQueue;        // queue to keep track of clients.
 
+int MAXCLIENTS = 3;
 
 // mutual exclusion variables for client queue
-pthread_mutex_t socketEdit;        // lock for editing clientQueue
-pthread_cond_t hasClient;          // condition if we have clients in queue
-pthread_cond_t hasSpace;           // if we are not full
+pthread_mutex_t socketEdit;             // lock for editing clientQueue
+pthread_cond_t clientNotEmpty;          // condition if we have clients in queue
+pthread_cond_t clientNotFull;           // if we are not full
 
-pthread_mutex_t logEdit;        // lock for editing logQueue
-pthread_cond_t hasLog;          // condition if we have log in queue
-pthread_cond_t logSpace;
+//mututal exclusion condition variables for log queue 
+pthread_mutex_t logEdit;			  // lock for editing logQueue
+pthread_cond_t logNotEmpty;           // condition if we have log in queue
+pthread_cond_t logNotFull;
 
 // thread pool
 pthread_t worker1;
@@ -66,7 +72,7 @@ string* gdiction = new string [99171];
 
 
 // main function for program
-int main (){
+int main (int argc , char** argv){
 
 
 // create worker thread pool
@@ -77,15 +83,27 @@ pthread_create(&logger, NULL, log, NULL);
 
 // set mutual exclusion conditions on start to open
 pthread_mutex_unlock(&socketEdit);
-pthread_cond_signal(&hasSpace);
-
-
-
+pthread_cond_signal(&clientNotFull);
+pthread_cond_signal(&clientNotEmpty);
 pthread_mutex_unlock(&logEdit);
-pthread_cond_signal(&logSpace);
+pthread_cond_signal(&logNotFull);
+
+//check if user provided arguments for dictionary and port 
+if (argc == 2) { DICTIONARY = argv[1]; 
+cout << "loading dictionary from " << DICTIONARY << endl;
+}// end if
+if (argc == 3) { DICTIONARY = argv[1]; PORT = atoi(argv[2]);
+//cout << "loading dictionary from " << DICTIONARY << endl;
+}
+else {
+	DICTIONARY = "dictionary.txt";
+	cout << "loading dictionary from " << DICTIONARY << endl;
+     }// end else
+
+
 
 //load dictionary
-gdiction = loadDiction();
+gdiction = loadDiction(DICTIONARY);
 
 
     int socket_desc, new_socket, c;     //socket file descriptors
@@ -93,9 +111,11 @@ gdiction = loadDiction();
 
     // here we call the function to open and assign incoming port
      socket_desc = open_listenfd(PORT);
+
     // log to console
     cout << "Waiting for incoming connections at port number " << PORT << "..." << endl;
     //while loop that continues to wait for incoming connections
+
     while(1)
     {
 
@@ -107,16 +127,22 @@ gdiction = loadDiction();
             return 1;
         }
         puts("Connection accepted.");
-
-
+		pthread_cond_signal(&clientNotEmpty);
+//              if(clientQueue.size() >=MAXCLIENTS){
+//              //if full wait until its not full
+//              pthread_cond_wait(&hasSpace, &socketEdit);
+//               }
 	       // add client to queue
           clientQueue.push(new_socket);
-          pthread_cond_signal(&hasSpace);
+		  // print queue for debugging
+		  printQueue(clientQueue);
+          pthread_cond_signal(&clientNotFull);
+		
 
 
     } // end while
 
-
+	return 0;
 } // end main
 
 /*
@@ -135,7 +161,7 @@ void *work(void *varg){
         while(clientQueue.empty())
                 {
                     // if we are empty then set condition we have space and we are not editing queue
-                    pthread_cond_wait(&hasSpace, &socketEdit);
+                    pthread_cond_wait(&clientNotEmpty, &socketEdit);
                 }if(!clientQueue.empty()){
 
                         new_socket = clientQueue.front();
@@ -145,10 +171,13 @@ void *work(void *varg){
                // unlock
                pthread_mutex_unlock(&socketEdit);
 
-           pthread_cond_signal(&hasClient);
+         //  pthread_cond_signal(&clientNotEmpty);
            //Read from client and check words, also will write to log
-           serviceClient(new_socket,gdiction,logQueue);
-
+          int work = serviceClient(new_socket,gdiction,logQueue);
+            if (work ==1)
+            {
+                break;
+            }
          }
 
 } // end work
@@ -167,12 +196,11 @@ void *log  (void *varg){
 
   while(1){
         //lock mutex
-       //    pthread_mutex_lock(&logEdit);
+        pthread_mutex_lock(&logEdit);
 
         while(logQueue.empty())
                 {
-                    // if we are empty then set condition we have space and we are not editing queue
-              //     pthread_cond_wait(&logSpace, &logEdit);
+
                 }if(!logQueue.empty()){
 
                         //write to log file
@@ -181,14 +209,24 @@ void *log  (void *varg){
 
                }
                // unlock
-          //    pthread_mutex_unlock(&logEdit);
+               pthread_mutex_unlock(&logEdit);
 
              //write to log file
              logFile << w << endl;
 
-       //   pthread_cond_signal(&logSpace);
-      //    //Read from client and check words, also will write to log
 
          }
 
 } // end logvoid
+
+//testing function for debugging 
+int printQueue(queue<int> clientQueue){
+
+	int len = clientQueue.size();
+	for (int i = 0; i < len; i++) {
+
+		cout << "queue item " << i << "=" << clientQueue.front() << endl;
+		clientQueue.pop();
+	}
+	return 0;
+}

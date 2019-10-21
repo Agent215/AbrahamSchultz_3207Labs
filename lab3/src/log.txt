@@ -1,10 +1,8 @@
-MISSPELLED asd
+OK hello
 
-MISSPELLED gr
+MISSPELLED easdsad
 
-OK g
+OK hello
 
 MISSPELLED 1
-
-MISSPELLED 2
 
