@@ -26,5 +26,15 @@
  - Init.cpp            // read in dictionary
  - dictionary.txt      // list of correctly spelled words
  
+### Instructions to run
 
+in linux terminal type in the following order:
+- make
+- ./SpellCheck
+
+### Instructions to test
+
+in seperate linux command terminal while above program is running
+type the following commands in to linux terminal:
+- telnet [ip addres] [8000]
  
