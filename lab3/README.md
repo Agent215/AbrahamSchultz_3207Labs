@@ -17,7 +17,7 @@
  The service routine will check the input against an array of strings and return if there is a match or not.
  if there is a match that means the word is spelled correctly.
 ```
- [Click to download Uml diagram](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab3/uml-diagram.pdf) and ![uml diargram](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab3/uml-diagram.pdf)
+ [Click to download Uml diagram](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab3/uml-diagram.pdf) 
  
  ### Files included: 
  - uml-diagram.pdf     // design document
