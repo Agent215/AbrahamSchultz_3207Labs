@@ -10,13 +10,14 @@
   1. Accepting distributing connection requests from clients
   2. Additionally the main thread should be checking to see if there are any requests to write to the log
   these will be added to the log queue and removed as needed.
-
+```
   The worker threads will continually check if there is anything in the work Queue
   if there is they will run the service routine.
  
  The service routine will check the input against an array of strings and return if there is a match or not.
  if there is a match that means the word is spelled correctly.
-
+```
+ [Click to download Uml diagram](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab3/uml-diagram.pdf) 
  
  ### Files included: 
  - uml-diagram.pdf     // design document
@@ -25,5 +26,15 @@
  - Init.cpp            // read in dictionary
  - dictionary.txt      // list of correctly spelled words
  
+### Instructions to run
 
+in linux terminal type in the following order:
+- make
+- ./SpellCheck
+
+### Instructions to test
+
+in seperate linux command terminal while above program is running
+type the following commands in to linux terminal:
+- telnet [ip addres] [8000]
  
