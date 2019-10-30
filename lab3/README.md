@@ -30,7 +30,8 @@
 
 in linux terminal type in the following order:
 - make
-- ./SpellCheck
+- ./SpellCheck [dictionaryFileName] [port# to connect too]
+- if run with no arguments it will load dictionary.txt and use port 8000
 
 ### Instructions to test
 
