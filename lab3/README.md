@@ -35,7 +35,7 @@ in linux terminal type in the following order:
 
 ### Instructions to test
 
-in seperate linux command terminal while above program is running
+in seperate linux command terminal, while the above program is running,
 type the following commands in to linux terminal:
 - telnet [ip addres] [8000]
  
