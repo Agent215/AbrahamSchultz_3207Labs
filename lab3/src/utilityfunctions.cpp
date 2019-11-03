@@ -67,39 +67,39 @@ int serviceClient(int &client, string dict[],queue<string> &logqueue){
                     buf[i] = '\0';                              // make sure buf is empty by clearing it out
 
 
-                    string tmpMsg;                                                   //tmp string to hold message for user at any given time
-                    tmpMsg += "enter a word to check\n";                             //prompt message
+                    string tmpMsg;                                                    //tmp string to hold message for user at any given time
+                    tmpMsg += "enter a word to check\n";                              //prompt message
                     write(client, tmpMsg.c_str(), tmpMsg.size());
-                    // cout << "waiting for word" << endl;                           // server is waiting for input
-                    read(client, buf, 1024);                                         // receive input from client
-                    buf[strlen(buf)+1] = '\0';                                       // add terminating char to end of string
-                    string s = buf;                                                  //convert to c++ style string
-                    s.erase(s.length()-2);                                           //erase last two characters
-                    s.erase(remove(s.begin(), s.end(), '\n'), s.end());              // erase any nextline escape sequence chars in string
+                    // cout << "waiting for word" << endl;                            // server is waiting for input
+                     read(client, buf, 1024);                                         // receive input from client
 
                     //debugging
                     cout <<"Received " << buf << endl;
 
-                    int correct = checkSpell(s,dict );     // call checkSpell function, 1 if correct
+
+                    string a (buf);                                      //convert to c++ style string
+                    a.erase(a.length()-2);
+                    a.erase(remove(a.begin(), a.end(), '\n'), a.end());  // erase any nextline escape sequence chars in string
+                    int correct = checkSpell(a,dict );                   // call checkSpell function, 1 if correct
 
 
 
 			// if the user types exit then exit loop. this frees up the worker thread to accpet new clients
-                     if (strcmp(s.c_str(), "exit")==0){ cout << "a client exited program" << endl; break;}
+                     if (strcmp(a.c_str(), "exit")==0){ cout << "a client exited program" << endl; break;}
                       if (correct == 1) {   // if correct then tell client
 
                           tmpMsg = "OK ";                   //OK message
-                          tmpMsg += s;
+                          tmpMsg += a;
                           tmpMsg += "\n";
-                          write(client, tmpMsg.c_str(), tmpMsg.size());
+                       //   write(client, tmpMsg.c_str(), tmpMsg.size());
 
                                        } // end if
                       else{
 
                           tmpMsg = "MISSPELLED ";                  // if misspelled send to client
-                          tmpMsg += s;
+                          tmpMsg += a;
                           tmpMsg += "\n";
-                          write(client, tmpMsg.c_str(), tmpMsg.size());
+                       //   write(client, tmpMsg.c_str(), tmpMsg.size());
                            } // end else
 
                             // add log data to log queue

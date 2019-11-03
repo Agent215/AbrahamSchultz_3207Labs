@@ -1,8 +1,12 @@
 OK hello
 
-MISSPELLED easdsad
+OK a
 
-OK hello
+MISSPELLED sd
 
-MISSPELLED 1
+OK checking
+
+MISSPELLED hello1
+
+MISSPELLED hj
 
