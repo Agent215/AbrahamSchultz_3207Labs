@@ -35,6 +35,13 @@ in linux terminal type in the following order:
 
 ### Instructions to test
 
+[Click to download Unit Testing doc](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab3/netSpellTesting.pdf)
+
+- option 1
+I also built a client program that can be run to test.
+type : ./client [hostname] [port number] [number of clinets to make]
+
+- option 2
 in seperate linux command terminal, while the above program is running,
 type the following commands in to linux terminal:
 - telnet [ip addres] [8000]
