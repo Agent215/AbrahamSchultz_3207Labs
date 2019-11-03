@@ -2,7 +2,7 @@
 utilityFunctions.cpp
 Abraham Schultz
 
-last edited 10/16/2019
+last edited 11/3/2019
 
 this will contain various functions needed to create a
 networked spell checker program
@@ -86,12 +86,13 @@ int serviceClient(int &client, string dict[],queue<string> &logqueue){
 
 			// if the user types exit then exit loop. this frees up the worker thread to accpet new clients
                      if (strcmp(a.c_str(), "exit")==0){ cout << "a client exited program" << endl; break;}
-                      if (correct == 1) {   // if correct then tell client
+
+                      if (correct == 1) {                   // if correct then tell client
 
                           tmpMsg = "OK ";                   //OK message
                           tmpMsg += a;
                           tmpMsg += "\n";
-                       //   write(client, tmpMsg.c_str(), tmpMsg.size());
+                          write(client, tmpMsg.c_str(), tmpMsg.size());
 
                                        } // end if
                       else{
@@ -99,7 +100,7 @@ int serviceClient(int &client, string dict[],queue<string> &logqueue){
                           tmpMsg = "MISSPELLED ";                  // if misspelled send to client
                           tmpMsg += a;
                           tmpMsg += "\n";
-                       //   write(client, tmpMsg.c_str(), tmpMsg.size());
+                          write(client, tmpMsg.c_str(), tmpMsg.size());
                            } // end else
 
                             // add log data to log queue
@@ -120,8 +121,8 @@ this function is copied from page 906 of "Computer Systems a programers perspect
 this is a helper function which opens binds and returns and listening socket.
 */
 int open_listenfd(int port) {
-	int listenfd, optval=1;         // file descriptors
-	struct sockaddr_in serveraddr;  // struct for server address
+	int listenfd, optval=1;           // file descriptors
+	struct sockaddr_in serveraddr;    // struct for server address
 
 
 
@@ -150,4 +151,4 @@ int open_listenfd(int port) {
 	 }
 
 	 return listenfd;
-}
+} // end open_listenfd

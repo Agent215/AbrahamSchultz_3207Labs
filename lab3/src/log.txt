@@ -1,12 +1,8 @@
-OK hello
+OK hey
 
-OK a
+OK what
 
-MISSPELLED sd
+MISSPELLED noatasd
 
-OK checking
-
-MISSPELLED hello1
-
-MISSPELLED hj
+MISSPELLED hasdasd
 
