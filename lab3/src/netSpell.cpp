@@ -88,6 +88,7 @@ pthread_create(&logger, NULL, log, NULL);
 if (argc == 2) { DICTIONARY = argv[1];
 cout << "loading dictionary from " << DICTIONARY << endl;
 }// end if
+else
 if (argc == 3) { DICTIONARY = argv[1]; PORT = atoi(argv[2]);
 //cout << "loading dictionary from " << DICTIONARY << endl;
 }

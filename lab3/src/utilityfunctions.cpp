@@ -2,7 +2,7 @@
 utilityFunctions.cpp
 Abraham Schultz
 
-last edited 11/3/2019
+last edited 11/16/2019
 
 this will contain various functions needed to create a
 networked spell checker program
@@ -18,6 +18,7 @@ networked spell checker program
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+
 #include "netSpell.h"
 
 
@@ -36,6 +37,8 @@ int checkSpell(string input, string dict[]){
 
                   for (int i = 0; i < FILESIZE; i++)                            // check against dictionary array
                             {
+
+
 
                                  if (strcmp(input.c_str(),dict[i].c_str())==0)
                                      {                                            //compare against each word in array

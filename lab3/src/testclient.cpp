@@ -28,18 +28,17 @@ pthread_t client3;
 pthread_mutex_t lock;
 pthread_cond_t usingserver;
 
+int workers;   //number of workers
+
+int workerCount;
 // default values for host and port info
 int PORT = 8000;
 char * hostname = (char *)"129.32.95.111";
 
 //was gonna use this for thread pool
 pthread_t  threadPool[100];
-
-// network connection variables
-int socket_desc;
-struct sockaddr_in server;
-char *message ,server_reply[2000];
-
+//char server_reply[2000];
+//int socket_desc;
 /*
 *****************************************************************************************************
 main method here we create a pool of worker threads to each try and connect to a server that check spelling of input
@@ -49,6 +48,11 @@ before exiting to allow for more clients to connect.
  main(int argc, char *argv[])
  {
 
+
+ // for defining amount of work to be done
+workers = 10;
+// for counting jobs done
+workerCount = 0;
 
 // set mutual exclusion conditions on start to open
 pthread_mutex_unlock(&lock);
@@ -63,20 +67,9 @@ cout << "trying port " << PORT << endl;
 if (argc == 3) { hostname = argv[1]; PORT = atoi(argv[2]);
 cout << "trying port " << PORT << endl;
 }
-
-     //Create socket
-	 socket_desc= socket(AF_INET , SOCK_STREAM , 0);
-	 if (socket_desc== -1)
-     {printf("Could not create socket");}
-	 server.sin_addr.s_addr= inet_addr(hostname);
-	 server.sin_family= AF_INET;server.sin_port= htons( PORT );
-	 //Connect to remote server
-	 if (connect(socket_desc, (struct sockaddr*)&server , sizeof(server)) < 0)
-            {
-               cout <<"connect error" << endl;
-            }
-     puts("Connected");
-
+if (argc == 4) { hostname = argv[1]; PORT = atoi(argv[2]); workers = atoi(argv[3]);
+cout << "trying port " << PORT << endl;
+}
 
 // create worker pool
 pthread_create(&client1, NULL, connectThread, NULL);
@@ -86,13 +79,13 @@ pthread_create(&client3, NULL, connectThread, NULL);
 
 // go forever!!
 while (1) {
-        pthread_create(&client3, NULL, connectThread, NULL);
-           if( recv(socket_desc, server_reply, 2000 , 0) < 0)            //Receive a reply from the server
-           {
-
-             puts("recvfailed");
-
-           } // end if
+      //  pthread_create(&client3, NULL, connectThread, NULL);
+//           if( recv(socket_desc, server_reply, 2000 , 0) < 0)            //Receive a reply from the server
+//           {
+//
+//             puts("recvfailed");
+//
+//           } // end if
          } // end while
 
 } // end main
@@ -109,41 +102,87 @@ while (1) {
  */
 void *connectThread(void * argv){
 
-while(1){
 
-           pthread_mutex_lock(&lock);       // lock
+// network connection variables
 
+struct sockaddr_in server;
+char *message ;
+
+
+
+for (int i= 0; i < workers ; i ++){
+
+
+workerCount ++;
+
+
+
+     char server_reply[2000];
+     int socket_desc;
+     //Create socket
+	 socket_desc= socket(AF_INET , SOCK_STREAM , 0);
+	 if (socket_desc== -1)
+     {printf("Could not create socket");}
+	 server.sin_addr.s_addr= inet_addr(hostname);
+	 server.sin_family= AF_INET;server.sin_port= htons( PORT );
+	 //Connect to remote server
+	 if (connect(socket_desc, (struct sockaddr*)&server , sizeof(server)) < 0)
+            {
+               cout <<"connect error" << endl;
+            }
+     puts("Connected");
+    cout << "job #: " <<workerCount << endl;
+
+
+
+//pthread_mutex_lock(&lock);       // lock
      	   message = (char *)"hello  ";
             //send first word
 	       if( send(socket_desc, message , strlen(message) , 0) < 0){
            puts("Send failed");
          break;
             }
+//pthread_mutex_unlock(&lock);        // unlock
             usleep(1000);
-             message = (char *)"word  ";
+
+//pthread_mutex_lock(&lock);
+           message = (char *)"word  ";
             //send second word
 	       if( send(socket_desc, message , strlen(message) , 0) < 0){
            puts("Send failed");
          break;
             }
+//pthread_mutex_unlock(&lock);        // unlock
             usleep(1000);
+
+//pthread_mutex_lock(&lock);
              message = (char *)"notaword  ";
             //send third word
 	       if( send(socket_desc, message , strlen(message) , 0) < 0){
            puts("Send failed");
          break;
             }
+//pthread_mutex_unlock(&lock);        // unlock
             usleep(1000);
+
+//pthread_mutex_lock(&lock);
               message = (char *)"exit  ";
             //send exit command word
 	       if( send(socket_desc, message , strlen(message) , 0) < 0){
            puts("Send failed");
          break;
             }
+//pthread_mutex_unlock(&lock);        // unlock
+             if( recv(socket_desc, server_reply, 2000 , 0) < 0)            //Receive a reply from the server
+           {
 
-    pthread_mutex_unlock(&lock);        // unlock
+             puts("recvfailed");
 
-    } // end while
+           } // end if
+
+
+
+    } // end foe
 
 
 } // end connectThread

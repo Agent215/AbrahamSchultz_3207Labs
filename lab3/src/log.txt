@@ -1,8 +1,94 @@
-OK hey
+OK hello
 
-OK what
+OK hello
 
-MISSPELLED noatasd
+OK word
 
-MISSPELLED hasdasd
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK hello
+
+OK word
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+MISSPELLED notaword
+
+OK hello
+
+OK word
+
+OK hello
+
+OK word
+
+MISSPELLED notaword
+
+OK hello
+
+MISSPELLED notaword
+
+OK word
+
+OK hello
+
+OK word
+
+MISSPELLED notaword
+
+MISSPELLED notaword
+
+OK word
+
+MISSPELLED notaword  exit
+
+MISSPELLED hello  word  notaword  exit
+
+MISSPELLED hello  word  notaword  exit
 
