@@ -38,7 +38,8 @@ in linux terminal type in the following order:
 [Click to download Unit Testing doc](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab3/netSpellTesting.pdf)
 
 - option 1
-I also built a client program that can be run to test.
+I built a client program that can be run to test.
+
 type : ./client [hostname] [port number] [number of clinets to make]
 
 - option 2
