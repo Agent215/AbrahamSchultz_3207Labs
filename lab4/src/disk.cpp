@@ -1,3 +1,14 @@
+/*
+disk.cpp
+
+Abraham Schultz
+11/24/2019
+
+most of this code was provided by professor Eugene Kwatney for use
+with the virtual file system project.
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,7 +23,7 @@ static int handle;      /* file handle to virtual disk       */
 
 /******************************************************************************/
 int make_disk(char *name)
-{ 
+{
   int f, cnt;
   char buf[BLOCK_SIZE];
 
@@ -42,13 +53,13 @@ int open_disk(char *name)
   if (!name) {
     fprintf(stderr, "open_disk: invalid file name\n");
     return -1;
-  }  
-  
+  }
+
   if (active) {
     fprintf(stderr, "open_disk: disk is already open\n");
     return -1;
   }
-  
+
   if ((f = open(name, O_RDWR, 0644)) < 0) {
     perror("open_disk: cannot open file");
     return -1;
@@ -66,7 +77,7 @@ int close_disk()
     fprintf(stderr, "close_disk: no open disk\n");
     return -1;
   }
-  
+
   close(handle);
 
   active = handle = 0;
