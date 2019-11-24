@@ -9,3 +9,5 @@ An introduction to operating systems
 - Command line interpreter
 ## Lab 3
 - Networked spell checker
+## Lab 4
+- Virtual File System
