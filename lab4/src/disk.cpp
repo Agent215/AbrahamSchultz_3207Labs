@@ -21,6 +21,8 @@ with the virtual file system project.
 static int active = 0;  /* is the virtual disk open (active) */
 static int handle;      /* file handle to virtual disk       */
 
+struct FAT fat;
+struct File root_dir;
 /******************************************************************************/
 int make_disk(char *name)
 {
@@ -45,7 +47,7 @@ int make_disk(char *name)
 
   return 0;
 }
-
+/******************************************************************************/
 int open_disk(char *name)
 {
   int f;
@@ -70,7 +72,7 @@ int open_disk(char *name)
 
   return 0;
 }
-
+/******************************************************************************/
 int close_disk()
 {
   if (!active) {
@@ -84,7 +86,7 @@ int close_disk()
 
   return 0;
 }
-
+/******************************************************************************/
 int block_write(int block, char *buf)
 {
   if (!active) {
@@ -109,7 +111,7 @@ int block_write(int block, char *buf)
 
   return 0;
 }
-
+/******************************************************************************/
 int block_read(int block, char *buf)
 {
   if (!active) {
@@ -134,3 +136,35 @@ int block_read(int block, char *buf)
 
   return 0;
 }
+/******************************************************************************/
+
+/*
+function to initialize the first block of memory on disk with FAT
+and also to add the root directory
+*/
+int initBootSector (){
+
+
+lseek(handle,  0, SEEK_SET);
+
+   fat = {};
+   root_dir = {};
+   struct Block superBlock;
+
+  fat.TotalBlocks =BLOCK_SIZE ;
+  fat.UnusedBlocks = BLOCK_SIZE;
+  root_dir.FileSize = 32;           // allocate 32 bytes to root directory
+  root_dir.isDir = 0; // is dir
+  root_dir.startingAddr =0;
+  root_dir.filePointer = 0;
+  superBlock.isUsed =1;
+  superBlock.blockNum = 1;
+  root_dir.blockList.push_back (superBlock);    // add super block to root dir meta data
+  fat.UnusedBlocks = BLOCK_SIZE -1;
+  fat.FAT.push_back(root_dir); // add root dir to fat table
+
+
+
+return 0;
+} // end initBootSector
+/******************************************************************************/
