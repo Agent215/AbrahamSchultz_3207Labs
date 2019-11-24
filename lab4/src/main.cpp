@@ -21,6 +21,7 @@ and directories.
 #include <readline/history.h>
 #include <stdio.h>
 #include "disk.h"
+#include "header.h"
 /******************************************************************************/
 /******************************************************************************/
 /*
@@ -36,9 +37,10 @@ int main (int argc , char** argv){
 
 printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"
         "\n>*******************************"
-        "\n-Use at your own risk..."
-        "\nList of Commands supported:"
-        "\n>exit  // exits"
+        "\n Use at your own risk..."
+        "\n List of Commands supported:"
+        "\n exit  // exits"
+        "\n new  // creates new disk"
         "\n>*******************************"
         "\n");
 
@@ -54,7 +56,7 @@ char* buf;
 buf = NULL;
 
 // prompt user
-printf("Please type a command \n " );
+printf("Please type a command \n" );
 
 // get user input and wait for user to hit enter
 buf = readline("");
@@ -63,7 +65,18 @@ if(strcmp(buf, "exit")== 0)
 {
  break;
  return 0;
+}else
+if(strcmp(buf, "new")== 0)
+{
+
+    // prompt user
+    printf("Please type name of disk\n" );
+
+    // get user input and wait for user to hit enter
+    buf = readline("");
+    make_fs(buf);
 }
+
 } // end while
 return 0;
 }// end main
@@ -73,19 +86,37 @@ return 0;
 // function to make a blank virtual disk ready to be mounted and used.
 int make_fs(char *virtualDisk) {
 
+  int returnValue;
+
   make_disk(virtualDisk);     //call make disk function passing user argument
-  open_disk(virtualDisk);       // call open disk function passing user argument
+  returnValue = open_disk(virtualDisk);       // call open disk function passing user argument
+  initBootSector ();
 
+  if(returnValue == 0){
 
+    printf("made disk %s successfully \n",virtualDisk);
+    return 0;
+  }   else {
 
-  return 0;
+    printf("failed to create disk \n");
+    return 1;
+  }
 } // end initdisk
 
 /******************************************************************************/
   int mount_fs(char *disk_name)
   {
+    int returnValue;
+    returnValue = open_disk(virtualDisk);       // call open disk function passing user argument
+   if(returnValue == 0){
 
-   return 0;
+    printf("mounted disk %s successfully \n",virtualDisk);
+    return 0;
+  }   else {
+
+    printf("failed to mount disk \n");
+    return 1;
+  }
   };
 /******************************************************************************/
   int umount_fs(char *disk_name);

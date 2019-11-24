@@ -16,6 +16,7 @@ with the virtual file system project.
 #include <string.h>
 
 #include "disk.h"
+#include "header.h"
 
 /******************************************************************************/
 static int active = 0;  /* is the virtual disk open (active) */
@@ -145,8 +146,8 @@ and also to add the root directory
 int initBootSector (){
 
 
-lseek(handle,  0, SEEK_SET);
-
+   lseek(handle,  0, SEEK_SET);
+   int ptr = 0;
    fat = {};
    root_dir = {};
    struct Block superBlock;
@@ -164,6 +165,9 @@ lseek(handle,  0, SEEK_SET);
   fat.FAT.push_back(root_dir); // add root dir to fat table
 
 
+  // write to disk
+   block_write(superBlock.blockNum,superBlock.DATA);
+   lseek(handle, 2 * BLOCK_SIZE, SEEK_SET);
 
 return 0;
 } // end initBootSector
