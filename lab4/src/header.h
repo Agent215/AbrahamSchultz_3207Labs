@@ -35,6 +35,7 @@ int fs_write(int fildes, void *buf, size_t nbyte);
 int fs_get_filesize(int fildes);
 int fs_lseek(int fildes, off_t offset);
 int fs_truncate(int fildes, off_t length);
+int readFile(char * name);
 /************************* STRUCTS ***************************************************/
 
 struct Block {
@@ -47,7 +48,7 @@ struct Block {
 /******************************************************************************/
 struct File {
 	vector <Block> blockList;   // this will contain the blocks holding the data
-	char * filename;            // name of file
+	char  filename[15];            // name of file
 	int FileSize;              //  = blockList.size * BLOCK_SIZE;
 	int filePointer;            // pointer to current data byte
 	int filedes;                // file descriptor , -1 if closed should always be closed after unmount
