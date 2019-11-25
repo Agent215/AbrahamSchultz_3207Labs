@@ -11,6 +11,8 @@ contains structs and function declarations  for file system implementation over 
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <list>
+#include <queue>
 
 #ifndef _HEADER_H_
 #define _HEADER_H_
@@ -45,17 +47,18 @@ struct Block {
 /******************************************************************************/
 struct File {
 	vector <Block> blockList;   // this will contain the blocks holding the data
-	string filename;            // name of file
+	char * filename;            // name of file
 	int FileSize;              //  = blockList.size * BLOCK_SIZE;
 	int filePointer;            // pointer to current data byte
+	int filedes;                // file descriptor , -1 if closed should always be closed after unmount
 	int startingAddr;           // address of first block used by this file
 	int isDir;                  // flag 0 if dir 1 if regular file
 	char * parent;              // parent of file or directory none if root.
 								// we will compare values using starting address
-	bool operator<(const File& rhs) const
-	{
-		return startingAddr > rhs.startingAddr;
-	}
+//	bool operator<(const File& rhs) const
+//	{
+//		return startingAddr > rhs.startingAddr;
+//	}
 }; // end File
 /******************************************************************************/
    // a Struct definition for FAT
