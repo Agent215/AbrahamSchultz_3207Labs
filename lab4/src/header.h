@@ -36,6 +36,7 @@ int fs_get_filesize(int fildes);
 int fs_lseek(int fildes, off_t offset);
 int fs_truncate(int fildes, off_t length);
 int readFile(char * name);
+int printFat();
 /************************* STRUCTS ***************************************************/
 
 struct Block {

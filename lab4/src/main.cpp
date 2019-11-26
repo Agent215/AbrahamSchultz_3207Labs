@@ -30,9 +30,9 @@ and directories.
 
 using namespace std;
 /******************************************************************************/
-struct FAT fat;
-struct File root_dir;
-int fileDesCount;
+struct FAT fat;                                                              ///
+struct File root_dir;                                                        ///
+int fileDesCount;                                                            ///
 /******************************************************************************/
 /*
 Main function should act as a shell program to accept commands
@@ -53,16 +53,18 @@ fileDesCount = 0;
 // flags
 int running = 0;
 
-printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"
-        "\n>*******************************"
-        "\n Use at your own risk..."
-        "\n List of Commands supported:"
-        "\n exit  // exits"
-        "\n new  // creates new disk"
-        "\n read  // opens and reads contents of a file"
-        "\n>*******************************"
-        "\n");
-
+/******************************************************************************/
+printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
+        "\n>*******************************\n"                                ///
+        "\n Use at your own risk...\n"                                        ///
+        "\n List of Commands supported:"                                      ///
+        "\n exit  // exits"                                                   ///
+        "\n new  // creates new disk"                                         ///
+        "\n read  // opens and reads contents of a file"                      ///
+        "\n mount  // mounts disk contents of a file"                         ///
+        "\n>*******************************"                                  ///
+        "\n");                                                                ///
+/******************************************************************************/
 while (running == 0) {
 //create a string buf to hold user input
 char* buf;
@@ -102,13 +104,23 @@ if(strcmp(buf, "read")== 0)
     buf = readline("");
     // make new disk using user input as name
     readFile(buf);
-}
 
+
+    //block_write(1,"testing data");
+    char * tmp ;
+//    block_read(1, tmp);
+   // printf("data from block 1 testing :\n %s \n",tmp);
+}
+else
+if(strcmp(buf, "mount")== 0)
+{
+   //  mount_fs(buf);
+}
 } // end while
 return 0;
 }// end main
 /******************************************************************************/
-//                      FUNCTIONS
+//                      FUNCTIONS                                            ///
 /******************************************************************************/
 // function to make a blank virtual disk ready to be mounted and used.
 int make_fs(char *virtualDisk) {
@@ -177,10 +189,12 @@ int initBootSector (){
   fat.FAT.push_back(root_dir); // add root dir to fat table
 
    // write to disk // testing for debugging
-   block_write(superBlock.blockNum,superBlock.DATA);
+   block_write(superBlock.blockNum,"testing data");
 
    printf("creating super block at block %i \n file descriptor count %i \n", superBlock.blockNum,fileDesCount);
 
+   //debugging
+    printFat();
 
 return 0;
 } // end initBootSector
@@ -202,13 +216,14 @@ then assign a file descriptor to file and increment count for file descriptor
 
    if (strcmp(fat.FAT.at(i).filename, name)== 0 )
         {
-
+         printf("\n opening file : %s... \n", name);
         // check if we have enough file descriptors
         if (fileDesCount <MAX_OPEN_FILE)
             {
                 // set file descriptor + 1
                 fileDesCount ++;
                 fat.FAT.at(i).filedes = fileDesCount;
+                printf("setting file descriptor %i \n", fileDesCount);
             }else {return 1;}
         } // end if
 
@@ -251,7 +266,6 @@ other wise return -1
   int fs_read(int fildes, void *buf, size_t nbyte)
               {
                   void* tmp;
-                  tmp = buf;
 
 
    //check if file exists
@@ -259,19 +273,22 @@ other wise return -1
 
    if (fat.FAT.at(i).filedes == fildes )
         {
-            //return try and read
-            if (block_read(0, (char*)tmp) > 0)
+
+            printf("found file with descriptor %i", fildes);
+//
+//            //return try and read
+          if (block_read(1 , (char*)tmp) > 0)
                 {
                      printf("\n\n testing read %p",tmp);
                     return 0;
                 } else {
-                  printf("\n\n problem with read read %p",tmp);
+                  printf("\n\n problem with read %p",tmp);
                 }
 
         } // end if
 
   } // end for
-     printf("file descriptor count %i \n", fileDesCount);
+  printf("file descriptor count %i \n", fileDesCount);
   printf("failed read \n");
   return -1;
               }
@@ -287,9 +304,10 @@ that the file has been opened.
   {
   int returnvalue = -1;
   // check if file exists/ is open
-  for (int i =0 ; i < fat.FAT.size(); i ++){
+  for (int i =0 ; i < fat.FAT.size(); i ++)
+    {
 
-   if (fat.FAT.at(i).filedes == fildes )
+        if (fat.FAT.at(i).filedes == fildes )
         {
             returnvalue =fat.FAT.at(i).FileSize;
             return returnvalue;
@@ -307,27 +325,44 @@ that the file has been opened.
 /*
 testing function for reading contents of file
 */
-  int readFile(char * name)
-  {
-      void * tmp;
-      //open file
-      fs_open(name);
-      int des;
-
-       for (int i =0 ; i < fat.FAT.size(); i ++){
-
-      // get file descriptor
-   if (strcmp(fat.FAT.at(i).filename, (char*)name)== 0 )
+int readFile(char * name)
+{
+void * tmp;
+//open file
+fs_open(name);
+int des;
+       for (int i =0 ; i < fat.FAT.size(); i ++)
         {
-            des =fat.FAT.at(i).filedes;
 
-        } // end if
+           // get file descriptor
+            if (strcmp(fat.FAT.at(i).filename, (char*)name)== 0 )
+                {
+                    des =fat.FAT.at(i).filedes;
+
+                } // end if
+
+        } // end for
+
+    fs_read(des, tmp,BLOCK_SIZE );
+    printf("file descriptor count %i \n", fileDesCount);
+return 0;
+} // end openFile
+
+/******************************************************************************/
+
+//testing function
+int printFat()
+{
+
+     printf("size of FAT %i \n\n ", fat.FAT.size());
+     for (int i =0 ; i < fat.FAT.size(); i ++){
+ printf("***********************\n  " );
+ printf("FILE NAME: %s \n  ",fat.FAT.at(i).filename );
+ printf("FILE SIZE: %s \n  ",fat.FAT.at(i).FileSize );
+ printf("FILE DES: %s \n  ",fat.FAT.at(i).filedes );
+ printf("FILE START ADDR: %s \n  ",fat.FAT.at(i).startingAddr );
+ printf("FILE PARENT: %s \n\n\n  ",fat.FAT.at(i).parent );
+
 
   } // end for
-
-      fs_read(des, tmp,BLOCK_SIZE );
-       printf("file descriptor count %i \n", fileDesCount);
-        return 0;
-  } // end openFile
-
-
+}
