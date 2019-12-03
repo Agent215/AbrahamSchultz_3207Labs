@@ -23,10 +23,10 @@ at each location in memory by using the following data structures:
 - BLOCK  // this will describe meta data of the blocks
 
 when we mount a disk initially, we will create new FAT with no files. If we mount an existing disk, then we
-must look to the starting super block. this is where the meta data for the FAT is. 
+must look to the starting super block where the meta data for the FAT is. We will then load the metadata in to our structs listed above.
 On the flip side when we unmount the disk, we will need to write all the meta data for the FAT to the super block. This 
 is accomplished by using a loop where we append the data for each file to one large string, then use block write to write this 
-to the first block. In this way we can have the file structure and hierarchy of our file system be persistent.
+to the first block. There is then a function ParseMetaData, which will take the string and parse it in to its associated structs.In this way we can have the file structure and hierarchy of our file system be persistent.
 
 - refer to design document for entire list of available functions. 
 ## instructions to run
