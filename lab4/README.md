@@ -22,7 +22,7 @@ at each location in memory by using the following data structures:
 - FILE   // will keep all meta data about a file object
 - BLOCK  // this will describe meta data of the blocks
 
-when we mount a disk initially, we will create new FAT with no files. If we mount a disk of an existing disk, then we
+when we mount a disk initially, we will create new FAT with no files. If we mount an existing disk, then we
 must look to the starting super block. this is where the meta data for the FAT is. 
 On the flip side when we unmount the disk, we will need to write all the meta data for the FAT to the super block. This 
 is accomplished by using a loop where we append the data for each file to one large string, then use block write to write this 
