@@ -45,8 +45,8 @@ we should be able to accept commands:
 int main (int argc , char** argv){
 
 //allocate memory
-//FAT* fat = new FAT;
-//File* root_dir = new File;
+//FAT fat = new FAT;
+//File root_dir = new File;
 
 // start with no open files
 fileDesCount = 0;
@@ -176,13 +176,10 @@ and also to add the root directory
 */
 int initBootSector (){
 
-	int ptr = 0;
-	fat = {};
-	root_dir = {};
 	struct Block superBlock;
 
-	fat.TotalBlocks = BLOCK_SIZE;
-	fat.UnusedBlocks = BLOCK_SIZE;
+	fat.TotalBlocks = DISK_BLOCKS;
+	fat.UnusedBlocks = DISK_BLOCKS;
 	root_dir.FileSize = 32;           // allocate 32 bytes to root directory
 	root_dir.isDir = 0; // is dir
 	root_dir.startingAddr = 0;
@@ -192,11 +189,11 @@ int initBootSector (){
 	superBlock.isUsed = 1;
 	superBlock.blockNum = 1;
 	root_dir.blockList.push_back(superBlock);    // add super block to root dir meta data
-	fat.UnusedBlocks = BLOCK_SIZE - 1;
+	fat.UnusedBlocks = DISK_BLOCKS - 1;
 	fat.FAT.push_back(root_dir); // add root dir to fat table
 
 	// write to disk // testing for debugging
-//	block_write(superBlock.blockNum, "testing data");
+    //	block_write(superBlock.blockNum, "testing data");
 	printf("creating super block at block %i \n file descriptor count %i \n", superBlock.blockNum, fileDesCount);
 
 	//debugging
