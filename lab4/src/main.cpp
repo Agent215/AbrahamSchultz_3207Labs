@@ -31,7 +31,7 @@ and directories.
 using namespace std;
 /******************************************************************************/
 struct FAT fat;                                                              ///
-struct File root_dir;                                                        ///
+struct File root_dir; 														 ///
 int fileDesCount;                                                            ///
 /******************************************************************************/
 /*
@@ -52,6 +52,7 @@ int main (int argc , char** argv){
 fileDesCount = 0;
 // flags
 int running = 0;
+
 
 /******************************************************************************/
 printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
@@ -105,11 +106,14 @@ if(strcmp(buf, "read")== 0)
     // make new disk using user input as name
     readFile(buf);
 
+    printFat();
+    block_write(0,"testing data");
+    char * tmp;
+    tmp = (char *)malloc(1 * sizeof(char));
+    block_read(0, tmp);
+    printf("data from block 1 testing :\n %s \n",tmp);
 
-    //block_write(1,"testing data");
-    char * tmp ;
-//    block_read(1, tmp);
-   // printf("data from block 1 testing :\n %s \n",tmp);
+ //   free (tmp);
 }
 else
 if(strcmp(buf, "mount")== 0)
@@ -117,6 +121,9 @@ if(strcmp(buf, "mount")== 0)
    //  mount_fs(buf);
 }
 } // end while
+
+
+
 return 0;
 }// end main
 /******************************************************************************/
@@ -169,32 +176,33 @@ and also to add the root directory
 */
 int initBootSector (){
 
-   int ptr = 0;
-   fat = {};
-   root_dir = {};
-   struct Block superBlock;
+	int ptr = 0;
+	fat = {};
+	root_dir = {};
+	struct Block superBlock;
 
-  fat.TotalBlocks =BLOCK_SIZE ;
-  fat.UnusedBlocks = BLOCK_SIZE;
-  root_dir.FileSize = 32;           // allocate 32 bytes to root directory
-  root_dir.isDir = 0; // is dir
-  root_dir.startingAddr =0;
-  root_dir.filePointer = 0;
-  // use strncpy to make sure no buffer overflow
-  strncpy( root_dir.filename, "/",sizeof(root_dir.filename)-1 );
-  superBlock.isUsed =1;
-  superBlock.blockNum = 1;
-  root_dir.blockList.push_back(superBlock);    // add super block to root dir meta data
-  fat.UnusedBlocks = BLOCK_SIZE -1;
-  fat.FAT.push_back(root_dir); // add root dir to fat table
+	fat.TotalBlocks = BLOCK_SIZE;
+	fat.UnusedBlocks = BLOCK_SIZE;
+	root_dir.FileSize = 32;           // allocate 32 bytes to root directory
+	root_dir.isDir = 0; // is dir
+	root_dir.startingAddr = 0;
+	root_dir.filePointer = 0;
+	// use strncpy to make sure no buffer overflow
+	strncpy(root_dir.filename, "/", sizeof(root_dir.filename) - 1);
+	superBlock.isUsed = 1;
+	superBlock.blockNum = 1;
+	root_dir.blockList.push_back(superBlock);    // add super block to root dir meta data
+	fat.UnusedBlocks = BLOCK_SIZE - 1;
+	fat.FAT.push_back(root_dir); // add root dir to fat table
 
-   // write to disk // testing for debugging
-   block_write(superBlock.blockNum,"testing data");
+	// write to disk // testing for debugging
+//	block_write(superBlock.blockNum, "testing data");
+	printf("creating super block at block %i \n file descriptor count %i \n", superBlock.blockNum, fileDesCount);
 
-   printf("creating super block at block %i \n file descriptor count %i \n", superBlock.blockNum,fileDesCount);
+	//debugging
+	//printFat();
 
-   //debugging
-    printFat();
+
 
 return 0;
 } // end initBootSector
@@ -265,7 +273,8 @@ other wise return -1
 
   int fs_read(int fildes, void *buf, size_t nbyte)
               {
-                  void* tmp;
+	  char * tmp;
+	  tmp = (char *)malloc(1 * sizeof(char));
 
 
    //check if file exists
@@ -279,10 +288,10 @@ other wise return -1
 //            //return try and read
           if (block_read(1 , (char*)tmp) > 0)
                 {
-                     printf("\n\n testing read %p",tmp);
+                     printf("\n\n date from read: %p",tmp);
                     return 0;
                 } else {
-                  printf("\n\n problem with read %p",tmp);
+                  printf("\n\n problem with reading file %i",fildes);
                 }
 
         } // end if
@@ -354,15 +363,22 @@ return 0;
 int printFat()
 {
 
-     printf("size of FAT %i \n\n ", fat.FAT.size());
-     for (int i =0 ; i < fat.FAT.size(); i ++){
- printf("***********************\n  " );
- printf("FILE NAME: %s \n  ",fat.FAT.at(i).filename );
- printf("FILE SIZE: %s \n  ",fat.FAT.at(i).FileSize );
- printf("FILE DES: %s \n  ",fat.FAT.at(i).filedes );
- printf("FILE START ADDR: %s \n  ",fat.FAT.at(i).startingAddr );
- printf("FILE PARENT: %s \n\n\n  ",fat.FAT.at(i).parent );
+ printf("size: %i , Is Dir: %i , Strt Addr: %i  , pointer : %i \n",root_dir.FileSize,root_dir.isDir,root_dir.startingAddr,root_dir.filePointer);
+
+  printf("size of FAT %i \n\n ", fat.FAT.size());
+  printf("used blocks : %i \n" , fat.UnusedBlocks);
+for (int i =0 ; i < fat.FAT.size(); i ++)
+ {
+
+     printf("element in FAT: %i \n  ", i );
+     printf("***********************\n  " );
+     printf("FILE NAME: %s \n  ",fat.FAT.at(i).filename );
+     printf("FILE SIZE: %d \n  ",fat.FAT.at(i).FileSize );
+     printf("FILE DES: %i \n  ",fat.FAT.at(i).filedes );
+     printf("FILE START ADDR: %i \n  ",fat.FAT.at(i).startingAddr );
+     printf("FILE PARENT: %i \n\n\n  ",fat.FAT.at(i).parent );
 
 
-  } // end for
+  } // end for]
+  return 0;
 }
