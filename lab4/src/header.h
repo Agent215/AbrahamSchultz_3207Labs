@@ -21,7 +21,7 @@ using namespace std;
 
 /********************* FUNCTION DECLARATIONS *************************************/
 int make_fs(char *virtualDisk);
-///* initialize the disk  */
+/* initialize the disk  */
 int initBootSector();         /* initialize the boot sector, which is the first memory blocks on disk  */
 int mount_fs(char *disk_name);
 int umount_fs(char *disk_name);
@@ -37,6 +37,9 @@ int fs_lseek(int fildes, off_t offset);
 int fs_truncate(int fildes, off_t length);
 int readFile(char * name);
 int printFat();
+int writeMetaData(); 			// function to write the fat metadata to super block when needed
+int parseMetaData();    		// function to parse metadata from string back to structs
+int findEmptyBlock();			// search through fat for empty block
 /************************* STRUCTS ***************************************************/
 
 struct Block {
@@ -50,17 +53,14 @@ struct Block {
 struct File {
 	vector <Block> blockList;   // this will contain the blocks holding the data
 	char  filename[15];            // name of file
-	int FileSize;              //  = blockList.size * BLOCK_SIZE;
-	int filePointer;            // pointer to current data byte
-	int filedes;                // file descriptor , -1 if closed should always be closed after unmount
-	int startingAddr;           // address of first block used by this file
-	int isDir;                  // flag 0 if dir 1 if regular file
-	char * parent;              // parent of file or directory none if root.
+	unsigned int FileSize;              //  = blockList.size * BLOCK_SIZE;
+	unsigned int filePointer;            // pointer to current data byte
+	unsigned int filedes;                // file descriptor , -1 if closed should always be closed after unmount
+	unsigned int startingAddr;           // address of first block used by this file
+	unsigned int isDir;                  // flag 0 if dir 1 if regular file
+	char  parent[15];              // parent of file or directory none if root.
 								// we will compare values using starting address
-//	bool operator<(const File& rhs) const
-//	{
-//		return startingAddr > rhs.startingAddr;
-//	}
+
 }; // end File
 /******************************************************************************/
    // a Struct definition for FAT

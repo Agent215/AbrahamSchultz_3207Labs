@@ -17,6 +17,8 @@ and directories.
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
+#include <iostream>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <vector>
@@ -33,6 +35,7 @@ using namespace std;
 struct FAT fat;                                                              ///
 struct File root_dir; 														 ///
 int fileDesCount;                                                            ///
+char * cwd  ;   /* keep track of what directory we are in */                 ///
 /******************************************************************************/
 /*
 Main function should act as a shell program to accept commands
@@ -52,7 +55,7 @@ int main (int argc , char** argv){
 fileDesCount = 0;
 // flags
 int running = 0;
-
+char * tmp;
 
 /******************************************************************************/
 printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
@@ -104,25 +107,42 @@ if(strcmp(buf, "read")== 0)
     // get user input and wait for user to hit enter
     buf = readline("");
     // make new disk using user input as name
-    readFile(buf);
+  //  readFile(buf);
 
     printFat();
-    block_write(0,"testing data");
-    char * tmp;
+   // block_write(0,"testing data");
+//
     tmp = (char *)malloc(1 * sizeof(char));
     block_read(0, tmp);
     printf("data from block 1 testing :\n %s \n",tmp);
 
- //   free (tmp);
+
 }
 else
 if(strcmp(buf, "mount")== 0)
 {
-   //  mount_fs(buf);
+
+     // prompt user
+    printf("Please type name of the disk to mount\n" );
+    // get user input and wait for user to hit enter
+    buf = readline("");
+    // make new disk using user input as name
+    mount_fs(buf);
 }
+else
+if(strcmp(buf, "unmount")== 0)
+{
+
+   // prompt user
+    printf("Please type name of the disk to unmount\n" );
+    // get user input and wait for user to hit enter
+    buf = readline("");
+    // make new disk using user input as name
+
+    umount_fs(buf);
+}
+
 } // end while
-
-
 
 return 0;
 }// end main
@@ -187,13 +207,15 @@ int initBootSector (){
 	// use strncpy to make sure no buffer overflow
 	strncpy(root_dir.filename, "/", sizeof(root_dir.filename) - 1);
 	superBlock.isUsed = 1;
-	superBlock.blockNum = 1;
+	superBlock.blockNum = 0;
 	root_dir.blockList.push_back(superBlock);    // add super block to root dir meta data
 	fat.UnusedBlocks = DISK_BLOCKS - 1;
 	fat.FAT.push_back(root_dir); // add root dir to fat table
 
+	// we start in the root directory
+	cwd = root_dir.filename;
 	// write to disk // testing for debugging
-    //	block_write(superBlock.blockNum, "testing data");
+    block_write(superBlock.blockNum, "boot sector");
 	printf("creating super block at block %i \n file descriptor count %i \n", superBlock.blockNum, fileDesCount);
 
 	//debugging
@@ -204,9 +226,20 @@ int initBootSector (){
 return 0;
 } // end initBootSector
 /******************************************************************************/
-  int umount_fs(char *disk_name)
+// in this function we will write back all the FAT meta data to the super block
+// and make sure all open files are closed
+// we will then close the disk
+ int umount_fs(char *disk_name)
   {
-      return 0;
+	// write meta data to first block in virtual disk memoroy
+	writeMetaData();
+	// close the disk that is currently open
+	int val = close_disk();
+
+	//print to terminal on failure or success
+	if (val == 0){printf("disk closed correctly \n"); return 0;}
+        else {return -1;}
+
   }
 /******************************************************************************/
 /*
@@ -280,15 +313,15 @@ other wise return -1
    if (fat.FAT.at(i).filedes == fildes )
         {
 
-            printf("found file with descriptor %i", fildes);
+            printf("found file with descriptor %i \n", fildes);
 //
 //            //return try and read
-          if (block_read(1 , (char*)tmp) > 0)
+          if (block_read(0 , (char*)tmp) > 0)
                 {
-                     printf("\n\n date from read: %p",tmp);
+                     printf("\n\n date from read: %p \n",tmp);
                     return 0;
                 } else {
-                  printf("\n\n problem with reading file %i",fildes);
+                  printf("\n\n problem with reading file %i \n",fildes);
                 }
 
         } // end if
@@ -360,9 +393,7 @@ return 0;
 int printFat()
 {
 
- printf("size: %i , Is Dir: %i , Strt Addr: %i  , pointer : %i \n",root_dir.FileSize,root_dir.isDir,root_dir.startingAddr,root_dir.filePointer);
-
-  printf("size of FAT %i \n\n ", fat.FAT.size());
+  printf("\n\nsize of FAT %i \n\n ", fat.FAT.size());
   printf("used blocks : %i \n" , fat.UnusedBlocks);
 for (int i =0 ; i < fat.FAT.size(); i ++)
  {
@@ -379,3 +410,59 @@ for (int i =0 ; i < fat.FAT.size(); i ++)
   } // end for]
   return 0;
 }
+
+/******************************************************************************/
+/* This function will iterate through the FAT and find all the files,
+  then for each file it will append all the meta data to one long string.
+  this string will then be written to the first block in the disk
+*/
+int writeMetaData(){
+
+string tmp;
+
+// iterate through FAT to find all files in system
+for (int i =0 ; i < fat.FAT.size(); i ++)
+  {
+//	// then for each file in the FAT we want to append the meta data to a string
+//	 make sure to convert each int to a string when appropriate
+
+tmp += to_string(fat.FAT.at(i).FileSize);
+tmp += " ";
+tmp += (string)fat.FAT.at(i).filename;
+tmp += " ";
+tmp += to_string(fat.FAT.at(i).filePointer);
+tmp += " ";
+tmp += to_string(fat.FAT.at(i).filedes);
+tmp += " ";
+tmp += to_string(fat.FAT.at(i).startingAddr);
+tmp += " ";
+tmp += to_string(fat.FAT.at(i).isDir);
+tmp += " ";
+tmp += (string)fat.FAT.at(i).parent;
+tmp += " ";
+tmp += to_string(fat.FAT.at(i).blockList.at(0).blockNum);
+tmp += " ";
+  // blocks where file is store for now just one we will put a loop here which add them all later
+tmp += "\n";
+
+
+cout << "writing FAT to disk : "<< tmp << endl;
+  }
+
+// once we run through FAT write to super-block
+//but lets check first if we actually wrote anything
+if (!tmp.empty())
+ {
+
+ block_write(0,(char *)tmp.c_str());
+ printf("successfully wrote FAT to super block \n");
+ return 0;
+ }
+// return 1 if nothing was written
+else
+ {
+   printf("nothing in FAT to write to superblock \n");
+   return 1;
+ }
+
+}// end writeMetaData
