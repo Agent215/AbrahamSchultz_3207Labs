@@ -31,11 +31,15 @@ and directories.
 #define MAX_OPEN_FILE   64
 
 using namespace std;
+
+/******************************************************************************/
 /******************************************************************************/
 struct FAT fat;                                                              ///
 struct File root_dir; 														 ///
 int fileDesCount;                                                            ///
 char * cwd  ;   /* keep track of what directory we are in */                 ///
+int filep ;/* number of last block written to*/                              ///
+/******************************************************************************/
 /******************************************************************************/
 /*
 Main function should act as a shell program to accept commands
@@ -47,16 +51,13 @@ we should be able to accept commands:
 */
 int main (int argc , char** argv){
 
-//allocate memory
-//FAT fat = new FAT;
-//File root_dir = new File;
-
 // start with no open files
 fileDesCount = 0;
-// flags
+// flag for running while loop
 int running = 0;
 char * tmp;
-
+//use escape sequence to clear console
+printf("\033[H\033[J") ;
 /******************************************************************************/
 printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
         "\n>*******************************\n"                                ///
@@ -66,6 +67,8 @@ printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               //
         "\n new  // creates new disk"                                         ///
         "\n read  // opens and reads contents of a file"                      ///
         "\n mount  // mounts disk contents of a file"                         ///
+        "\n unmount  // unmounts disk contents of a file"                     ///
+        "\n create  // creates a file with given name"                        ///
         "\n>*******************************"                                  ///
         "\n");                                                                ///
 /******************************************************************************/
@@ -107,15 +110,13 @@ if(strcmp(buf, "read")== 0)
     // get user input and wait for user to hit enter
     buf = readline("");
     // make new disk using user input as name
-  //  readFile(buf);
+   //  readFile(buf);
 
     printFat();
    // block_write(0,"testing data");
-//
     tmp = (char *)malloc(1 * sizeof(char));
     block_read(0, tmp);
     printf("data from block 1 testing :\n %s \n",tmp);
-
 
 }
 else
@@ -126,68 +127,38 @@ if(strcmp(buf, "mount")== 0)
     printf("Please type name of the disk to mount\n" );
     // get user input and wait for user to hit enter
     buf = readline("");
-    // make new disk using user input as name
+    // mount disk
     mount_fs(buf);
 }
 else
 if(strcmp(buf, "unmount")== 0)
 {
-
    // prompt user
     printf("Please type name of the disk to unmount\n" );
     // get user input and wait for user to hit enter
     buf = readline("");
-    // make new disk using user input as name
-
+    // unmount disk
     umount_fs(buf);
+}
+else
+if(strcmp(buf, "create")== 0)
+{
+
+   // prompt user
+    printf("Please type name of the new file to make\n" );
+    // get user input and wait for user to hit enter
+    buf = readline("");
+    // make new file using user input as name
+    fs_create(buf);
 }
 
 } // end while
 
 return 0;
 }// end main
+
 /******************************************************************************/
 //                      FUNCTIONS                                            ///
-/******************************************************************************/
-// function to make a blank virtual disk ready to be mounted and used.
-int make_fs(char *virtualDisk) {
-
-  int returnValue;
-
-  make_disk(virtualDisk);     //call make disk function passing user argument
-  returnValue = open_disk(virtualDisk);       // call open disk function passing user argument
-  initBootSector ();
-
-  if(returnValue == 0){
-
-    printf("made disk %s successfully \n",virtualDisk);
-    return 0;
-  }   else {
-
-    printf("failed to create disk \n");
-    return 1;
-  }
-} // end initdisk
-
-/******************************************************************************/
-  int mount_fs(char *disk_name)
-  {
-    int returnValue;
-    returnValue = open_disk(disk_name);       // call open disk function passing user argument
-
-    // we will also want to load the meta data for the FAT table from the super block
-    // this should probably be its own function
-
-    if(returnValue == 0){
-
-    printf("mounted disk %s successfully \n",disk_name);
-    return 0;
-  }   else {
-
-    printf("failed to mount disk \n");
-    return 1;
-  }
-  };
 /******************************************************************************/
 
 /*
@@ -213,7 +184,7 @@ int initBootSector (){
 	fat.FAT.push_back(root_dir); // add root dir to fat table
 
 	// we start in the root directory
-	cwd = root_dir.filename;
+	cwd = "/";
 	// write to disk // testing for debugging
     block_write(superBlock.blockNum, "boot sector");
 	printf("creating super block at block %i \n file descriptor count %i \n", superBlock.blockNum, fileDesCount);
@@ -226,21 +197,6 @@ int initBootSector (){
 return 0;
 } // end initBootSector
 /******************************************************************************/
-// in this function we will write back all the FAT meta data to the super block
-// and make sure all open files are closed
-// we will then close the disk
- int umount_fs(char *disk_name)
-  {
-	// write meta data to first block in virtual disk memoroy
-	writeMetaData();
-	// close the disk that is currently open
-	int val = close_disk();
-
-	//print to terminal on failure or success
-	if (val == 0){printf("disk closed correctly \n"); return 0;}
-        else {return -1;}
-
-  }
 /******************************************************************************/
 /*
 This function should check to see if given file exists, then if it does
@@ -269,6 +225,7 @@ then assign a file descriptor to file and increment count for file descriptor
     return 0;
   } // end fs_open
 /******************************************************************************/
+/******************************************************************************/
 /*
 This function should check if file is open and then close by setting file des to -1
 and returning 0.
@@ -294,11 +251,47 @@ other wise return -1
 
   };
 /******************************************************************************/
-  int fs_create(char *name);
+/******************************************************************************/
+/* This function will create a new file with the name as input
+    and with the parent set as the current working directoty. we do not give it a block yet.*/
+  int fs_create(char *name)
+  {
+    // make a temp file to name and add to FAT
+    File tmpFile  ;
+
+    //check if we have any file descriptors left to use
+    if (fileDesCount < MAX_OPEN_FILE)
+        {
+            // assign file initial values
+            tmpFile.filedes = -1 ; // it has not been opened yet
+            tmpFile.FileSize = 0;
+            strncpy(tmpFile.filename, name, sizeof(tmpFile.filename) - 1);
+            tmpFile.filePointer = 0;
+            tmpFile.isDir = 1 ; // this is not a directory
+            strncpy(tmpFile.parent, "/", sizeof(tmpFile.parent) - 1);   // parent is whatever the cwd is when made
+            tmpFile.startingAddr = 0;
+
+            // add new file to FAT
+            fat.FAT.push_back(tmpFile);
+            printFat();
+
+        }
+        else
+         {  // we have no open file descriptors return -1
+             printf("no open file descriptors please close a file \n");
+             return -1;
+         }
+
+         printf("created new file %s \n", name);
+    return 0;
+  } // end fs_create
+/******************************************************************************/
 /******************************************************************************/
   int fs_delete(char *name);
 /******************************************************************************/
+/******************************************************************************/
   int fs_mkdir(char *name);
+/******************************************************************************/
 /******************************************************************************/
 
   int fs_read(int fildes, void *buf, size_t nbyte)
@@ -314,13 +307,15 @@ other wise return -1
         {
 
             printf("found file with descriptor %i \n", fildes);
-//
+
 //            //return try and read
           if (block_read(0 , (char*)tmp) > 0)
                 {
                      printf("\n\n date from read: %p \n",tmp);
                     return 0;
-                } else {
+                }
+                else
+                {
                   printf("\n\n problem with reading file %i \n",fildes);
                 }
 
@@ -332,7 +327,9 @@ other wise return -1
   return -1;
               }
 /******************************************************************************/
+/******************************************************************************/
   int fs_write(int fildes, void *buf, size_t nbyte);
+/******************************************************************************/
 /******************************************************************************/
 /*
 This function grabs the correct file from FAT using the file descriptor
@@ -357,9 +354,12 @@ that the file has been opened.
   return returnvalue;
   }
 /******************************************************************************/
+/******************************************************************************/
   int fs_lseek(int fildes, off_t offset);
 /******************************************************************************/
+/******************************************************************************/
   int fs_truncate(int fildes, off_t length);
+/******************************************************************************/
 /******************************************************************************/
 /*
 testing function for reading contents of file
@@ -388,6 +388,7 @@ return 0;
 } // end openFile
 
 /******************************************************************************/
+/******************************************************************************/
 
 //testing function
 int printFat()
@@ -395,8 +396,9 @@ int printFat()
 
   printf("\n\nsize of FAT %i \n\n ", fat.FAT.size());
   printf("used blocks : %i \n" , fat.UnusedBlocks);
-for (int i =0 ; i < fat.FAT.size(); i ++)
+for (int i =0 ; i < fat.FAT.size() ; i ++)
  {
+
 
      printf("element in FAT: %i \n  ", i );
      printf("***********************\n  " );
@@ -404,13 +406,17 @@ for (int i =0 ; i < fat.FAT.size(); i ++)
      printf("FILE SIZE: %d \n  ",fat.FAT.at(i).FileSize );
      printf("FILE DES: %i \n  ",fat.FAT.at(i).filedes );
      printf("FILE START ADDR: %i \n  ",fat.FAT.at(i).startingAddr );
-     printf("FILE PARENT: %i \n\n\n  ",fat.FAT.at(i).parent );
+     printf("FILE PARENT: %i \n\n\n"  ,fat.FAT.at(i).parent );
 
+    // if we have any blocks
+    if (fat.FAT.at(i).blockList.size()> 0)
+     printf("FILE BlOCK NUMBERS: %i \n\n\n",fat.FAT.at(i).blockList.at(0).blockNum );
 
   } // end for]
   return 0;
 }
 
+/******************************************************************************/
 /******************************************************************************/
 /* This function will iterate through the FAT and find all the files,
   then for each file it will append all the meta data to one long string.
@@ -440,15 +446,14 @@ tmp += to_string(fat.FAT.at(i).isDir);
 tmp += " ";
 tmp += (string)fat.FAT.at(i).parent;
 tmp += " ";
+ if (fat.FAT.at(i).blockList.size()> 0)
 tmp += to_string(fat.FAT.at(i).blockList.at(0).blockNum);
 tmp += " ";
   // blocks where file is store for now just one we will put a loop here which add them all later
 tmp += "\n";
 
-
-cout << "writing FAT to disk : "<< tmp << endl;
   }
-
+cout << "writing FAT to disk : "<< tmp << endl;
 // once we run through FAT write to super-block
 //but lets check first if we actually wrote anything
 if (!tmp.empty())
@@ -466,3 +471,32 @@ else
  }
 
 }// end writeMetaData
+
+
+/******************************************************************************/
+/******************************************************************************/
+/*
+This function will read in the data in the 0th block where we keep the meta data
+for the fat and its associated files.
+I will use strok to tokenize the string in to lines, then from that break it down
+in to words to put back in to the FAT
+this will be called in the mount function
+*/
+int parseMetaData(char * data)
+{
+
+// temp variable for holding data
+//array of string to hold lines of data, where each line is a file
+
+
+// read in data string from block 0 using block read
+
+ // use strok and write each element out as a new element in the array of file data
+
+// then for each element in the array of strings we will use strok to break them down and
+// assign each value to the associated FAT value
+
+
+
+return 0;
+} // end parseMetaData

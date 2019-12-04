@@ -38,7 +38,7 @@ int fs_truncate(int fildes, off_t length);
 int readFile(char * name);
 int printFat();
 int writeMetaData(); 			// function to write the fat metadata to super block when needed
-int parseMetaData();    		// function to parse metadata from string back to structs
+int parseMetaData(char * data);    		// function to parse metadata from string back to structs
 int findEmptyBlock();			// search through fat for empty block
 /************************* STRUCTS ***************************************************/
 
