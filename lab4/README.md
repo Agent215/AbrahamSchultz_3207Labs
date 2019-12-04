@@ -32,8 +32,7 @@ is accomplished by using a loop where we append the data for each file to one la
 to the first block. There is then a function ParseMetaData, which will take the string and parse it in to its associated structs. In this way we can have the file structure and hierarchy of our file system be persistent.
 
 I Still need to implement the following functionality:
-The create file function will first check the size of the file and find as many empty blocks as needed. We then create a new file with the correct meta data and add the addresses for needed empty blocks. 
-The mkdir function should create a file but with the flag for is directory true.
+The write file function will first check the size of the file and find as many empty blocks as needed. We then associtate these blocks with the coresponding file and write to them one at a time.
 ls function will just go through FAT and find all files that parent matches current working directory and print them to screen. 
 cd will update current working directory variable if path exists.
 
