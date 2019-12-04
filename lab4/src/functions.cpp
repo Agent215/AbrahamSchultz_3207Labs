@@ -81,3 +81,9 @@ int make_fs(char *virtualDisk) {
 
   }
 /******************************************************************************/
+// use to clear screen when needed
+int clearScreen(){
+//use escape sequence to clear console
+printf("\033[H\033[J");
+return 0;
+}

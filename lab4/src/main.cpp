@@ -57,102 +57,134 @@ fileDesCount = 0;
 int running = 0;
 char * tmp;
 //use escape sequence to clear console
-printf("\033[H\033[J") ;
+clearScreen();
 /******************************************************************************/
 printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
         "\n>*******************************\n"                                ///
-        "\n Use at your own risk...\n"                                        ///
-        "\n List of Commands supported:"                                      ///
+        "\n Use at your own risk...\n\n"                                      ///
+        "\n List of Commands supported:\n"                                    ///
         "\n exit  // exits"                                                   ///
         "\n new  // creates new disk"                                         ///
         "\n read  // opens and reads contents of a file"                      ///
         "\n mount  // mounts disk contents of a file"                         ///
         "\n unmount  // unmounts disk contents of a file"                     ///
         "\n create  // creates a file with given name"                        ///
+        "\n delete  // deletes a file with given name\n"                      ///
+        "\n List of Commands not yet supported:\n"                            ///
+        "\n write // write some text data to file"                            ///
+        "\n truncate // truncate size of file"                                ///
+        "\n seek // set the disk pointer to a spot in memory"                 ///
+        "\n mkdir // make a directory "                                       ///
         "\n>*******************************"                                  ///
         "\n");                                                                ///
 /******************************************************************************/
 while (running == 0) {
 //create a string buf to hold user input
-char* buf;
-buf = NULL;
-
-// prompt user
-printf("Please type a command \n" );
-
-// get user input and wait for user to hit enter
-buf = readline("");
-
-// below we will check for matching words. this probably should be contained in a parse input function
-if(strcmp(buf, "exit")== 0)
-{
-
-printf("Goodbye\n" );
-running = 1;
-
-}else
-if(strcmp(buf, "new")== 0)
-{
+    char* buf;
+    buf = NULL;
 
     // prompt user
-    printf("Please type name of disk\n" );
+    printf("Please type a command \n" );
+
     // get user input and wait for user to hit enter
     buf = readline("");
-    // make new disk using user input as name
-    make_fs(buf);
-}
-else
-if(strcmp(buf, "read")== 0)
-{
 
-    // prompt user
-    printf("Please type name of file to read\n" );
-    // get user input and wait for user to hit enter
-    buf = readline("");
-    // make new disk using user input as name
-   //  readFile(buf);
+    // below we will check for matching words. this probably should be contained in a parse input function
+    if(strcmp(buf, "exit")== 0)
+    {
 
-    printFat();
-   // block_write(0,"testing data");
-    tmp = (char *)malloc(1 * sizeof(char));
-    block_read(0, tmp);
-    printf("data from block 1 testing :\n %s \n",tmp);
+    printf("Goodbye\n" );
+    running = 1;
 
-}
-else
-if(strcmp(buf, "mount")== 0)
-{
+    }else
+    if(strcmp(buf, "new")== 0)
+    {
 
-     // prompt user
-    printf("Please type name of the disk to mount\n" );
-    // get user input and wait for user to hit enter
-    buf = readline("");
-    // mount disk
-    mount_fs(buf);
-}
-else
-if(strcmp(buf, "unmount")== 0)
-{
-   // prompt user
-    printf("Please type name of the disk to unmount\n" );
-    // get user input and wait for user to hit enter
-    buf = readline("");
-    // unmount disk
-    umount_fs(buf);
-}
-else
-if(strcmp(buf, "create")== 0)
-{
+        // prompt user
+        printf("Please type name of disk\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // make new disk using user input as name
+        make_fs(buf);
+    }
+    else
+    if(strcmp(buf, "read")== 0)
+    {
 
-   // prompt user
-    printf("Please type name of the new file to make\n" );
-    // get user input and wait for user to hit enter
-    buf = readline("");
-    // make new file using user input as name
-    fs_create(buf);
-}
+        // prompt user
+        printf("Please type name of file to read\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // make new disk using user input as name
+        //  readFile(buf);
 
-} // end while
+        printFat();
+        // block_write(0,"testing data");
+        tmp = (char *)malloc(1 * sizeof(char));
+        block_read(0, tmp);
+        printf("data from block 1 testing :\n %s \n",tmp);
+
+    }
+    else
+    if(strcmp(buf, "mount")== 0)
+    {
+
+         // prompt user
+        printf("Please type name of the disk to mount\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // mount disk
+        mount_fs(buf);
+    }
+    else
+    if(strcmp(buf, "unmount")== 0)
+    {
+        // prompt user
+        printf("Please type name of the disk to unmount\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // unmount disk
+        umount_fs(buf);
+    }
+    else
+    if(strcmp(buf, "create")== 0)
+    {
+
+        // prompt user
+        printf("Please type name of the new file to make\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // make new file using user input as name
+        fs_create(buf);
+    }
+    else
+    if(strcmp(buf, "delete")== 0)
+    {
+
+        // prompt user
+        printf("Please type name of the new file to delete\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // make new file using user input as name
+        fs_delete(buf);
+
+    }
+     else
+    if(strcmp(buf, "print")== 0)
+    {
+
+       // for easy testing
+       printFat();
+
+    }
+      else
+    if(strcmp(buf, "clear")== 0)
+    {
+
+      clearScreen();
+
+    }
+}// end while
 
 return 0;
 }// end main
@@ -287,7 +319,33 @@ other wise return -1
   } // end fs_create
 /******************************************************************************/
 /******************************************************************************/
-  int fs_delete(char *name);
+/*
+In fs_delete we only are required for this project to delete an empty file
+this is easy because while a file is empty it only exists in the FAT
+so all we need to do is remove its entry from the FAT
+*/
+  int fs_delete(char *name)
+  {
+      // look for file
+      // first we check if file exists
+     for (int i =0 ; i < fat.FAT.size(); i ++)
+        {
+
+           if (strcmp(fat.FAT.at(i).filename, name)== 0  )
+            {
+                                                              // if we find a match then create an iterator to point to the index to delete
+                fat.FAT.erase(fat.FAT.begin() + i);           // we need to do it this way so erase works
+                printf("deleted %s successfully\n", name);    // pass the iterator to the erase function to remove the file from FAT
+                return 0;
+            }
+
+      }
+
+
+            // return 1 if no match found
+            printf("could not find file : %s \n", name);
+            return 1;
+  } // end fs_delete
 /******************************************************************************/
 /******************************************************************************/
   int fs_mkdir(char *name);
@@ -296,9 +354,8 @@ other wise return -1
 
   int fs_read(int fildes, void *buf, size_t nbyte)
               {
-	  char * tmp;
-	  tmp = (char *)malloc(1 * sizeof(char));
-
+   char * tmp;
+   tmp = (char *)malloc(1 * sizeof(char));
 
    //check if file exists
    for (int i =0 ; i < fat.FAT.size(); i ++){

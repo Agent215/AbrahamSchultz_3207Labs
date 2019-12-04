@@ -40,7 +40,9 @@ int printFat();
 int writeMetaData(); 			// function to write the fat metadata to super block when needed
 int parseMetaData(char * data);    		// function to parse metadata from string back to structs
 int findEmptyBlock();			// search through fat for empty block
-/************************* STRUCTS ***************************************************/
+int clearScreen();
+/************************* STRUCTS ********************************************/
+/******************************************************************************/
 
 struct Block {
 	char DATA[BLOCK_SIZE]; // these file will only hold text for now. 4096 bytes = 4KB
@@ -49,6 +51,7 @@ struct Block {
 	int blockNum;
 
 }; // end Block
+/******************************************************************************/
 /******************************************************************************/
 struct File {
 	vector <Block> blockList;   // this will contain the blocks holding the data
@@ -62,6 +65,7 @@ struct File {
 								// we will compare values using starting address
 
 }; // end File
+/******************************************************************************/
 /******************************************************************************/
    // a Struct definition for FAT
    // the fat contains a vector with each file
