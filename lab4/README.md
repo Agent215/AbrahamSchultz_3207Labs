@@ -9,7 +9,8 @@
 - disk.cpp // functions to read and write to virtual disk
 - header.h  // my header file
 - disk.h   // header file for program supplied by proffesor
-- main.cpp  
+- main.cpp
+- functions.cpp // various utility functions. and disk mount and unmount.
 - testDisk // a virtual disk for testing during development
 ## Design and testing
 The main function in this program will run a shell allowing the user to
