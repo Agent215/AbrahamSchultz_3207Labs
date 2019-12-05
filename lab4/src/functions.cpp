@@ -81,9 +81,55 @@ int make_fs(char *virtualDisk) {
 
   }
 /******************************************************************************/
+/******************************************************************************/
 // use to clear screen when needed
 int clearScreen(){
 //use escape sequence to clear console
 printf("\033[H\033[J");
 return 0;
+}
+/******************************************************************************/
+/******************************************************************************/
+// print program instructions
+int help() {
+/******************************************************************************/
+printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
+        "\n>*******************************\n"                                ///
+        "\n Use at your own risk...\n\n"                                      ///
+        "\n List of Commands supported:\n"                                    ///
+        "\n exit  // exits"                                                   ///
+        "\n new  // creates new disk"                                         ///
+        "\n read  // opens and reads contents of a file"                      ///
+        "\n mount  // mounts disk contents of a file"                         ///
+        "\n unmount  // unmounts disk contents of a file"                     ///
+        "\n create  // creates a file with given name"                        ///
+        "\n mkdir // make a directory "                                       ///
+        "\n delete  // deletes a file with given name\n"                      ///
+        "\n List of Commands not yet supported:\n"                            ///
+        "\n write // write some text data to file"                            ///
+        "\n truncate // truncate size of file"                                ///
+        "\n seek // set the disk pointer to a spot in memory"                 ///
+        "\n>*******************************"                                  ///
+        "\n\n");                                                                ///
+/******************************************************************************/
+return 0;
+} //end help
+
+/******************************************************************************/
+/******************************************************************************/
+// print the cwd as message prompt
+int promtUser(char * wd){
+
+char cwd[1000];
+   if (getcwd(cwd, sizeof(cwd)) != NULL)
+        {
+
+            printf("%s >> %s ", cwd , wd);
+        }   else
+        {
+
+            cout << strerror(errno) << endl;
+            printf("\x1b[0m");
+            return 1;
+        }// end else
 }

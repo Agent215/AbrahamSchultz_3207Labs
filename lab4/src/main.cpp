@@ -58,33 +58,17 @@ int running = 0;
 char * tmp;
 //use escape sequence to clear console
 clearScreen();
-/******************************************************************************/
-printf("\n***WELCOME MY VIRTUAL FILE SYSTEM***"                               ///
-        "\n>*******************************\n"                                ///
-        "\n Use at your own risk...\n\n"                                      ///
-        "\n List of Commands supported:\n"                                    ///
-        "\n exit  // exits"                                                   ///
-        "\n new  // creates new disk"                                         ///
-        "\n read  // opens and reads contents of a file"                      ///
-        "\n mount  // mounts disk contents of a file"                         ///
-        "\n unmount  // unmounts disk contents of a file"                     ///
-        "\n create  // creates a file with given name"                        ///
-        "\n delete  // deletes a file with given name\n"                      ///
-        "\n List of Commands not yet supported:\n"                            ///
-        "\n write // write some text data to file"                            ///
-        "\n truncate // truncate size of file"                                ///
-        "\n seek // set the disk pointer to a spot in memory"                 ///
-        "\n mkdir // make a directory "                                       ///
-        "\n>*******************************"                                  ///
-        "\n");                                                                ///
-/******************************************************************************/
+// print directions on program launch
+help();
+cwd = "";
+
 while (running == 0) {
 //create a string buf to hold user input
     char* buf;
     buf = NULL;
 
     // prompt user
-    printf("Please type a command \n" );
+   promtUser(cwd);
 
     // get user input and wait for user to hit enter
     buf = readline("");
@@ -95,6 +79,7 @@ while (running == 0) {
 
     printf("Goodbye\n" );
     running = 1;
+    umount_fs("");
 
     }else
     if(strcmp(buf, "new")== 0)
@@ -169,7 +154,7 @@ while (running == 0) {
         fs_delete(buf);
 
     }
-     else
+    else
     if(strcmp(buf, "print")== 0)
     {
 
@@ -177,11 +162,51 @@ while (running == 0) {
        printFat();
 
     }
-      else
+    else
     if(strcmp(buf, "clear")== 0)
     {
-
+     // clear screen
       clearScreen();
+
+    }
+    else
+    if(strcmp(buf, "help")== 0)
+    {
+
+    //print help
+     help();
+
+    }
+    else
+    if(strcmp(buf, "mkdir")== 0)
+    {
+
+        // prompt user
+        printf("Please type name of the new directory \n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        // make new directory using user input as name
+        fs_mkdir(buf);
+
+    }
+    else
+    if(strcmp(buf, "cd")== 0)
+    {
+
+        // prompt user
+        printf("Please type name of directory to change to\n" );
+        // get user input and wait for user to hit enter
+        buf = readline("");
+        //change to directory
+        changeDir(buf);
+
+
+    } else
+    if(strcmp(buf, "ls")== 0)
+    {
+
+      listDir();
+
 
     }
 }// end while
@@ -190,7 +215,7 @@ return 0;
 }// end main
 
 /******************************************************************************/
-//                      FUNCTIONS                                            ///
+//                       FILE FUNCTIONS                                       ///
 /******************************************************************************/
 
 /*
@@ -271,7 +296,6 @@ other wise return -1
 
    if (fat.FAT.at(i).filedes == fildes )
         {
-
             //return -1 and set file to closed
             returnvalue =fat.FAT.at(i).filedes = -1;
             return 0;
@@ -291,6 +315,8 @@ other wise return -1
     // make a temp file to name and add to FAT
     File tmpFile  ;
 
+    char * wd = cwd;
+    cout << wd << " is the cwd" << endl;
     //check if we have any file descriptors left to use
     if (fileDesCount < MAX_OPEN_FILE)
         {
@@ -300,7 +326,7 @@ other wise return -1
             strncpy(tmpFile.filename, name, sizeof(tmpFile.filename) - 1);
             tmpFile.filePointer = 0;
             tmpFile.isDir = 1 ; // this is not a directory
-            strncpy(tmpFile.parent, "/", sizeof(tmpFile.parent) - 1);   // parent is whatever the cwd is when made
+            strncpy(tmpFile.parent, wd, sizeof(tmpFile.parent) - 1);   // parent is whatever the cwd is when made
             tmpFile.startingAddr = 0;
 
             // add new file to FAT
@@ -340,15 +366,47 @@ so all we need to do is remove its entry from the FAT
             }
 
       }
-
-
             // return 1 if no match found
             printf("could not find file : %s \n", name);
             return 1;
   } // end fs_delete
 /******************************************************************************/
 /******************************************************************************/
-  int fs_mkdir(char *name);
+/*
+this function will create a new directory with the input name
+this is really just a file with its is dir bit flipped to 0
+*/
+  int fs_mkdir(char *name)
+  {
+        // make a temp file to name and add to FAT
+    File tmpFile  ;
+
+    //check if we have any file descriptors left to use
+    if (fileDesCount < MAX_OPEN_FILE)
+        {
+            // assign file initial values
+            tmpFile.filedes = -1 ; // is not a file
+            tmpFile.FileSize = 0;
+            strncpy(tmpFile.filename, name, sizeof(tmpFile.filename) - 1);
+            tmpFile.filePointer = 0;
+            tmpFile.isDir = 0 ; // this is  a directory
+            strncpy(tmpFile.parent, cwd, sizeof(tmpFile.parent) - 1);   // parent is whatever the cwd is when made
+            tmpFile.startingAddr = 0;
+
+            // add new file to FAT
+            fat.FAT.push_back(tmpFile);
+            printFat();
+
+        }
+        else
+         {  // we have no open file descriptors return -1
+             printf("no open file descriptors please close a file \n");
+             return -1;
+         }
+
+         printf("created new file %s \n", name);
+    return 0;
+  }
 /******************************************************************************/
 /******************************************************************************/
 
@@ -365,7 +423,7 @@ so all we need to do is remove its entry from the FAT
 
             printf("found file with descriptor %i \n", fildes);
 
-//            //return try and read
+        //return try and read
           if (block_read(0 , (char*)tmp) > 0)
                 {
                      printf("\n\n date from read: %p \n",tmp);
@@ -385,6 +443,14 @@ so all we need to do is remove its entry from the FAT
               }
 /******************************************************************************/
 /******************************************************************************/
+/*
+This function should write some data to the designated file
+it will first check the nbyte size to calculate how many blocks we need
+then we will check if there are enough open blocks
+if not return 0
+if there are we will then assign blocks to the file vector the starting from the lowest order blocks.
+We then will write the data 1 block at a time using the block write function
+*/
   int fs_write(int fildes, void *buf, size_t nbyte);
 /******************************************************************************/
 /******************************************************************************/
@@ -412,9 +478,12 @@ that the file has been opened.
   }
 /******************************************************************************/
 /******************************************************************************/
+// set disk pointer to start at location of input file with given offset amount
   int fs_lseek(int fildes, off_t offset);
 /******************************************************************************/
 /******************************************************************************/
+// chop of amount of needed blocks to get length to equal total blocks used
+// to store the file , we will just delete the blocks from blocks list.
   int fs_truncate(int fildes, off_t length);
 /******************************************************************************/
 /******************************************************************************/
@@ -429,7 +498,6 @@ fs_open(name);
 int des;
        for (int i =0 ; i < fat.FAT.size(); i ++)
         {
-
            // get file descriptor
             if (strcmp(fat.FAT.at(i).filename, (char*)name)== 0 )
                 {
@@ -456,14 +524,14 @@ int printFat()
 for (int i =0 ; i < fat.FAT.size() ; i ++)
  {
 
-
      printf("element in FAT: %i \n  ", i );
      printf("***********************\n  " );
      printf("FILE NAME: %s \n  ",fat.FAT.at(i).filename );
      printf("FILE SIZE: %d \n  ",fat.FAT.at(i).FileSize );
      printf("FILE DES: %i \n  ",fat.FAT.at(i).filedes );
+     printf("FILE ISDIR: %i \n  ",fat.FAT.at(i).isDir );
      printf("FILE START ADDR: %i \n  ",fat.FAT.at(i).startingAddr );
-     printf("FILE PARENT: %i \n\n\n"  ,fat.FAT.at(i).parent );
+     printf("FILE PARENT: %s \n\n\n"  ,fat.FAT.at(i).parent );
 
     // if we have any blocks
     if (fat.FAT.at(i).blockList.size()> 0)
@@ -535,13 +603,14 @@ else
 /*
 This function will read in the data in the 0th block where we keep the meta data
 for the fat and its associated files.
-I will use strok to tokenize the string in to lines, then from that break it down
+I will use stok to tokenize the string in to lines, then from that break it down
 in to words to put back in to the FAT
 this will be called in the mount function
 */
 int parseMetaData(char * data)
 {
 
+vector <char * > dataLines;   // to hold lines of data, each one is a files meta data
 // temp variable for holding data
 //array of string to hold lines of data, where each line is a file
 
@@ -557,3 +626,43 @@ int parseMetaData(char * data)
 
 return 0;
 } // end parseMetaData
+/******************************************************************************/
+/******************************************************************************/
+//function to implement cd
+int changeDir(char * name)
+{
+    //check each element in FAT for directory with same name as input
+    for (int i =0 ; i < fat.FAT.size() ; i ++)
+     {
+        if (fat.FAT.at(i).isDir == 0) {
+
+            if (strcmp(fat.FAT.at(i).filename, (char*)name)== 0){
+                cwd = name;                                            // if found then set cwd to name
+                printf("changing directory to %s \n", name);
+                return 0;
+            }
+        }
+     }
+
+
+        // else return error
+    printf("no such directory found\n");
+    return 1;
+} // end changeDir
+/******************************************************************************/
+/******************************************************************************/
+//function to implement ls
+int listDir()
+{
+    // check each item in FAT
+     for (int i =0 ; i < fat.FAT.size() ; i ++)
+     {
+           // if element parent matches cwd then print name to screen
+      if (strcmp(fat.FAT.at(i).parent, (char*)cwd)== 0)
+      {
+            printf ("%s    ", fat.FAT.at(i).filename);
+      }
+     }
+cout << endl;
+return 0;
+} // end listDir
