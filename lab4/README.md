@@ -4,6 +4,8 @@
 - A virtual disk built on top of the linux file system using a single file
 - this is to be implmented using a FAT data structure
 
+The professor provided a disk.c file and a disk.h file. these file use system calls to do disk I/O, and form the basis for the rest of my functions.
+
 Although I did not successfully complete every requirement for this project, I do believe I learned a lot and came close to finishing.
 Below I have outlined where I met, and did not meet the specifications for this lab.
 
