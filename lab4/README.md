@@ -27,7 +27,7 @@ at each location in memory by using the following data structures:
 - BLOCK   // this will describe meta data of the blocks
 
 Additionally, the user should be able to use the shell to display the file hierarchy of the file system to the terminal. Also, we should
-be able to navigate to at least one other directory and view its contents. The files for this project are only required to be text files. So, we should be able to print the contents of the file to the screen also.
+be able to navigate to at least one other directory and view its contents. The files for this project are only required to be text files. So, we should be able to print the contents of the file to the screen also. This is acomplished by having a current working directory variable that starts at the root. When we hit cd, we just check to make sure there is a file, that has the directory flag flipped with the matching name. then we change the cwd to that name. displaying the files works in the same way, except we search the fat for any files whos parent variable matches the cwd, then print to the screen.
 
 when we mount a disk initially, we will create new FAT with no files. If we mount an existing disk, then we
 must look to the starting super block where the meta data for the FAT is. We will then load the metadata in to our structs listed above.
@@ -50,8 +50,7 @@ I attempted to test my code in a modular fashion.
 almost every function has its own shell command to execute and test it.
 
 I could not get my parseMetaData function to work correctly. so, this means that my mount function does not load the FAT meta data
-back into memory. I was having reading the string into my parsing function. If I had been able to get that function to work 
-then my disk would have achieved persistence. 
+back into memory. Reading the string into my parsing function was givign me some trouble. If I had been able to get that function to work then my disk would have achieved persistence. 
 
 Furthermore, I did not get the write function to work. I intended to have a function find empty blocks and add them to the File block list. But this ended up taking longer than I anticipated. I did update my pseudo code for this and other functions in my design document.
 
