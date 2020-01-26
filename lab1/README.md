@@ -43,7 +43,7 @@ This is all handled by the event queue.
  
  See UML diagram for more information on functions contained in these files.
 
-![UML Diagram](https://github.com/Agent215/Discrete_Event_Simulation_Abraham_Schultz/raw/master/DES_diagram_AbrahamSchultz (7).pdf)
+![UML Diagram](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab1/DES_diagram_AbrahamSchultz.png)
 
 
 - To compile type : g++ c* -o YourExeNameHere
