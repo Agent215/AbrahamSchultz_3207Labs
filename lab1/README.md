@@ -46,6 +46,6 @@ This is all handled by the event queue.
 ![UML Diagram](https://github.com/Agent215/AbrahamSchultz_3207Labs/raw/master/lab1/DES_diagram_AbrahamSchultz.png)
 
 
-- To compile type : g++ c* -o YourExeNameHere
+- To compile type : g++ .cpp* -o YourExeNameHere
 - to run type: ./YourExeNameHere
 
